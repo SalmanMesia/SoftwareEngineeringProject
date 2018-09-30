@@ -2,8 +2,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.awt.CardLayout;
 
 import javax.swing.*;
@@ -12,7 +10,10 @@ import javax.swing.*;
 public class mainPanel extends JPanel{
 	static String[] columnNames = {"Priority","Description"};
 	static String[][] maintenanceTickets = {{"4", "FIRE"},{"2", "Clean Pool"}};
+	static String[][] employees;
+	static String[][] hours;
 	static Object[] rooms; //array of room objects from the database
+	static String[][] sales;
 	static JPanel c;
 	static JPanel checkInCards;
 	
@@ -52,12 +53,12 @@ public class mainPanel extends JPanel{
 		pInP.setLayout(new GridLayout(1,3));
 		
 		//Create Buttons
-		JButton servB = new JButton("Service");
+		JButton payrollB = new JButton("Payroll");
 		JButton maintB = new JButton("Maintenance");
 		JButton entertainB = new JButton("Entertainment");
 
 		//Add them to the horizontal Grid
-		pInP.add(servB);
+		pInP.add(payrollB);
 		pInP.add(maintB);
 		pInP.add(entertainB);
 		//Add horizontal Grid to a vertical Grid
@@ -70,49 +71,54 @@ public class mainPanel extends JPanel{
 		//Add that card to the overall layout
 		add(c,BorderLayout.CENTER);
 		//Add listeners
-		servB.addActionListener(new ButtonListener());
+		payrollB.addActionListener(new ButtonListener());
 		maintB.addActionListener(new ButtonListener());
 		entertainB.addActionListener(new ButtonListener());
 		checkinout.addActionListener(new ButtonListener());
 		/*
-		 * Screen: "Service Menu"
+		 * Screen: "Payroll Menu"
 		 */
 		//Pretty self-explanatory, just like the main menu.
-		JPanel servP = new JPanel();
-		servP.setLayout(new GridLayout(2,1));
-		JPanel servPInP = new JPanel();
-		servPInP.setLayout(new GridLayout(1,3));
+		JPanel payrollP = new JPanel();
+		payrollP.setLayout(new GridLayout(2,1));
+		JPanel payPInP = new JPanel();
+		payPInP.setLayout(new GridLayout(1,2));
 		
-		JButton roomsB = new JButton("Rooms");
-		JButton servReqB = new JButton("Service Requests");
-		JButton specReqB = new JButton("Special Requests");
+		JButton employeesB = new JButton("Employees");
+		JButton salesB = new JButton("Sales");
 		
-		servPInP.add(roomsB);
-		servPInP.add(servReqB);
-		servPInP.add(specReqB);
-		
-		servP.add(servPInP);
+		payPInP.add(employeesB);
+		payPInP.add(salesB);
 		
 		JButton backB = new JButton("Back");
-		servP.add(backB);
 		
-		c.add(servP, "Service");
+		payrollP.add(payPInP);
+		payrollP.add(backB);
 		
-		roomsB.addActionListener(new ButtonListener());
-		servReqB.addActionListener(new ButtonListener());
-		specReqB.addActionListener(new ButtonListener());
+		c.add(payrollP, "Payroll");
+		
+		employeesB.addActionListener(new ButtonListener());
+		salesB.addActionListener(new ButtonListener());
 		backB.addActionListener(new BackButtonListener());
 		/*
-		 * Screen: "Rooms Menu"
+		 * Screen: "Employees Menu"
 		 */
-		JPanel roomsP = new JPanel();
-		roomsP.setLayout(new FlowLayout());
+		JPanel employeeP = new JPanel();
+		employeeP.setLayout(new GridLayout(3,1));
 		
-		JButton roomsBackB = new JButton("Reset");
-		roomsBackB.addActionListener(new BackButtonListener());
-		roomsP.add(roomsBackB);
+		JTable employeeTable = new JTable();
 		
-		JPanel roomDummy = new JPanel();
+		JTable workSchedule = new JTable();
+		
+		JButton employeeBackB = new JButton("Back");
+		employeeBackB.addActionListener(new payrollBackListener());
+		
+		employeeP.add(employeeTable);
+		employeeP.add(workSchedule);
+		employeeP.add(employeeBackB);
+		
+		
+		/*JPanel roomDummy = new JPanel();
 		roomDummy.setBorder(BorderFactory.createLineBorder(Color.black)); //add a line border to the JPanel
 		roomDummy.setLayout(new GridLayout(4,1));
 		JLabel roomDummyName = new JLabel("Name: Dummy Room");
@@ -125,71 +131,28 @@ public class mainPanel extends JPanel{
 		roomDummy.add(roomDummyPrice);
 		roomDummy.add(roomDummyVacancy);
 		roomsP.add(roomDummy);
-		
-		c.add(roomsP, "Rooms");
+		*/
+		c.add(employeeP, "Employees");
 		/*
-		 * Screen: "Service Requests"
+		 * Screen: "Sales"
 		 */
-		JPanel servReqP = new JPanel();
-		servReqP.setLayout(new BorderLayout());
-		JPanel servReqBottomP = new JPanel();
-		servReqBottomP.setLayout(new GridLayout(1,2));
-		JPanel servReqCenterP = new JPanel();
-		servReqCenterP.setLayout(new FlowLayout());
+		JPanel salesP = new JPanel();
+		salesP.setLayout(new BorderLayout());
+
+		JTable salesTable = new JTable();
 		
-		JLabel servReqTitle = new JLabel("Request Amenities");
-		servReqTitle.setHorizontalAlignment(JLabel.CENTER);
+		JLabel salesTitle = new JLabel("Sales");
+		salesTitle.setHorizontalAlignment(JLabel.CENTER);
 		
-		JButton servReqBackB = new JButton("Reset");
-		servReqBackB.addActionListener(new BackButtonListener());
+		JButton salesBackB = new JButton("Back");
+		salesBackB.addActionListener(new payrollBackListener());
 		
-		JButton servReqOrder = new JButton("Make Request");
-		servReqOrder.addActionListener(new RequestListener());
+		salesP.add(salesTitle, BorderLayout.NORTH);
+		salesP.add(salesBackB, BorderLayout.SOUTH);
+		salesP.add(salesTable, BorderLayout.CENTER);
 		
-		JCheckBox towelReqBox = new JCheckBox("Towels");
-		JCheckBox hairProdReqBox = new JCheckBox("Shampoo/Conditioner");
-		JCheckBox sheetsReqBox = new JCheckBox("Bed Sheets");
-		JCheckBox pillowReqBox = new JCheckBox("Pillows");
-		JCheckBox lotionReqBox = new JCheckBox("Lotion");
-		
-		servReqP.add(servReqTitle, BorderLayout.NORTH);
-		servReqBottomP.add(servReqBackB);
-		servReqBottomP.add(servReqOrder);
-		servReqP.add(servReqBottomP, BorderLayout.SOUTH);
-		
-		servReqCenterP.add(towelReqBox);
-		servReqCenterP.add(hairProdReqBox);
-		servReqCenterP.add(sheetsReqBox);
-		servReqCenterP.add(pillowReqBox);
-		servReqCenterP.add(lotionReqBox);
-		servReqP.add(servReqCenterP, BorderLayout.CENTER);
-		
-		c.add(servReqP, "Service Requests");
-		/*
-		 * Screen: "Special Requests"
-		 */
-		JPanel specialP = new JPanel();
-		specialP.setLayout(new BorderLayout());
-		JPanel specialBottomP = new JPanel();
-		specialBottomP.setLayout(new GridLayout(1,2));
-		
-		JLabel specialLabel = new JLabel("Enter Request:");
-		specialLabel.setHorizontalAlignment(JLabel.CENTER);
-		JTextArea specialText = new JTextArea();
-		JButton specialBackB = new JButton("Reset");
-		JButton specialSubmitB = new JButton("Submit");
-		
-		specialBackB.addActionListener(new BackButtonListener());
-		//specialSubmitB.addActionListener();
-		
-		
-		specialBottomP.add(specialBackB);
-		specialBottomP.add(specialSubmitB);
-		specialP.add(specialLabel, BorderLayout.NORTH);
-		specialP.add(specialBottomP, BorderLayout.SOUTH);
-		specialP.add(specialText, BorderLayout.CENTER);
-		
-		c.add(specialP, "Special Requests");
+		c.add(salesP, "Sales");
+
 		/*
 		 * Screen: "Maintenance Menu"
 		 */
@@ -209,7 +172,7 @@ public class mainPanel extends JPanel{
 		JScrollPane maintScrollPane = new JScrollPane(maintTable);
 		maintTable.setFillsViewportHeight(true);
 		
-		JButton maintBackB = new JButton("Reset");
+		JButton maintBackB = new JButton("Back");
 		maintBackB.addActionListener(new BackButtonListener());
 		
 		JButton maintRequestB = new JButton("Maintenance Request");
@@ -233,10 +196,10 @@ public class mainPanel extends JPanel{
 		JLabel maintReqLabel = new JLabel("Enter Request:");
 		maintReqLabel.setHorizontalAlignment(JLabel.CENTER);
 		JTextArea maintReqText = new JTextArea();
-		JButton maintReqBackB = new JButton("Reset");
+		JButton maintReqBackB = new JButton("Back");
 		JButton maintReqSubmitB = new JButton("Submit");
 		
-		maintReqBackB.addActionListener(new BackButtonListener());
+		maintReqBackB.addActionListener(new maintReqBackListener());
 		//maintReqSubmitB.addActionListener();
 		
 		
@@ -290,7 +253,7 @@ public class mainPanel extends JPanel{
 		
 		checkP.add(checkPInP);
 		
-		JButton checkBackB = new JButton("Reset");
+		JButton checkBackB = new JButton("Back");
 		checkP.add(checkBackB);
 		
 		c.add(checkP, "Check-In/Out");
@@ -306,9 +269,9 @@ public class mainPanel extends JPanel{
 		
 		JLabel diningMenu = new JLabel("MENU GOES HERE");
 		diningMenu.setHorizontalAlignment(JLabel.CENTER);
-		JButton diningBackB = new JButton("Reset");
+		JButton diningBackB = new JButton("Back");
 		
-		diningBackB.addActionListener(new BackButtonListener());
+		diningBackB.addActionListener(new entertainmentBackListener());
 		
 		diningP.add(diningMenu);
 		diningP.add(diningBackB);
@@ -327,8 +290,8 @@ public class mainPanel extends JPanel{
 		
 		JLabel eventSchedule = new JLabel("Schedule:\n9/12/2018 - Presentation Build #1 @ 2:30PM");
 		
-		JButton eventBackB = new JButton("Reset");
-		eventBackB.addActionListener(new BackButtonListener());
+		JButton eventBackB = new JButton("Back");
+		eventBackB.addActionListener(new entertainmentBackListener());
 		
 		eventDataP.add(eventMap);
 		eventDataP.add(eventSchedule);
@@ -360,8 +323,8 @@ public class mainPanel extends JPanel{
 		//Calendar checkInCal = new GregorianCalendar(2000, Calendar.JANUARY, 1);
 		//datePicker.setValue(checkInCal.getTime());
 		
-		JButton checkInDateBackB = new JButton("Reset");
-		checkInDateBackB.addActionListener(new BackButtonListener());
+		JButton checkInDateBackB = new JButton("Back");
+		checkInDateBackB.addActionListener(new checkInOutBackListener());
 		
 		JButton checkInDateB = new JButton("Confirm");
 		checkInDateB.addActionListener(new DateListener());
@@ -390,8 +353,8 @@ public class mainPanel extends JPanel{
 		JTextField checkInIDNumField = new JTextField(9);
 		JButton checkInIDConfirm = new JButton("Submit");
 		checkInIDConfirm.addActionListener(new IDListener());
-		JButton checkInIDBackB = new JButton("Reset");
-		checkInIDBackB.addActionListener(new BackButtonListener());
+		JButton checkInIDBackB = new JButton("Back");
+		checkInIDBackB.addActionListener(new checkInIDBackListener());
 		
 		checkInIDCredP.add(checkInIDFName);
 		checkInIDCredP.add(checkInIDFNameField);
@@ -438,8 +401,8 @@ public class mainPanel extends JPanel{
 		JTextField checkOutIDNumField = new JTextField(9);
 		JButton checkOutIDConfirm = new JButton("Submit");
 		checkOutIDConfirm.addActionListener(new IDOutListener());
-		JButton checkOutIDBackB = new JButton("Reset");
-		checkOutIDBackB.addActionListener(new BackButtonListener());
+		JButton checkOutIDBackB = new JButton("Back");
+		checkOutIDBackB.addActionListener(new checkInOutBackListener());
 		
 		checkOutIDCredP.add(checkOutIDFName);
 		checkOutIDCredP.add(checkOutIDFNameField);
@@ -482,11 +445,38 @@ public class mainPanel extends JPanel{
 			cardLayout.first(c);
 		}
 	}
-	private class RequestListener implements ActionListener{
+	private class payrollBackListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
-			
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, "Payroll");
 		}
 	}
+	private class maintReqBackListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, "Maintenance");
+		}
+	}
+	private class entertainmentBackListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, "Entertainment");
+		}
+	}
+	private class checkInOutBackListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, "Check-In/Out");
+		}
+	}
+	private class checkInIDBackListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, "Check-In");
+		}
+	}
+	
+	
 	private class DateListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			//if(datePicker.)
