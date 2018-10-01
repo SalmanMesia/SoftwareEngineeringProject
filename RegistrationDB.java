@@ -13,6 +13,8 @@
 //CHECK-OUT: YYYY/MM/DD HH:MI:SS 
 //GUESTS: Number of Guests
 
+import javax.swing.*;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -75,13 +77,14 @@ public class RegistrationDB {
 		}
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 		
-//		Statement s = con.createStatement();
-//        boolean result = s.execute("SELECT Room FROM guests WHERE CheckIn = " + formatter.format(checking) + " AND Room = " + Room + ";");
-//        if(result) {
-//			System.out.println("Already Reserved " + result);
-//			return;
-//		}
-//		else {
+		Statement s = con.createStatement();
+        String sql = "SELECT Room FROM guests WHERE Room = " + Room + " AND CheckIn BETWEEN '" + formatter.format(checking) + "' AND '" + formatter.format(checkout) + "'";
+        ResultSet check = s.executeQuery(sql);
+		if(check.isBeforeFirst()) {
+        	 JOptionPane.showMessageDialog(null, "Room already reserved!","Alert",JOptionPane.WARNING_MESSAGE);     
+        	return;
+		}
+		else {
 			PreparedStatement prep = con.prepareStatement("INSERT INTO guests VALUES(?,?,?,?,?,?,?,?);");
 			prep.setString(2, first_name);
 			prep.setString(3, last_name);
@@ -93,7 +96,7 @@ public class RegistrationDB {
 			
 			prep.execute();		
 		}
-//	}
+	}
 	
 	//Display Rooms boooked on certain date
 	public ResultSet displayBooking(Date checking, Date checkout) throws ClassNotFoundException, SQLException {
