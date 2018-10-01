@@ -4,7 +4,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.CardLayout;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,18 +13,38 @@ import java.util.Vector;
 
 
 public class mainPanel extends JPanel{
+	/*
+	 * This is the master panel that actually contains everything.
+	 */
+	static JPanel c;
+	/*
+	 * This are placeholder variables that should be replaced by actual database objects.
+	 */
 	static String[] columnNames = {"Priority","Description"};
 	static String[][] maintenanceTickets = {{"4", "FIRE"},{"2", "Clean Pool"}};
 	static String[][] employees;
 	static String[][] hours;
 	static String[][] sales;
-	static JPanel c;
+	
+	/*
+	 * Static objects just for the Rooms DB.
+	 */
 	static RoomsDB rooms = gui.rooms;
 	static JTable roomTable;
 	static JCheckBox cableCB;
 	static JCheckBox internetCB;
 	static JComboBox<Object> roomCB;
-	                                    
+	
+	/*
+	 * Static objects just for the Registration DB.
+	 */
+	static RegistrationDB registration = gui.registration;
+	static SpinnerDateModel beginDateModel;
+	static SpinnerDateModel endDateModel;
+	static JTextField checkInIDFNameField;
+	static JTextField checkInIDLNameField;
+	static JLabel checkInTime;
+	
 	public mainPanel() throws ClassNotFoundException, SQLException{
 		//Establish main layout of our GUI
 		setLayout(new BorderLayout());
@@ -341,88 +360,92 @@ public class mainPanel extends JPanel{
 		
 		c.add(eventP, "Event Spaces");
 		/*
-		 * Check-In Date
+		 * Check-In
 		 */
-		JPanel checkInCards = new JPanel();
-		checkInCards.setLayout(new CardLayout());
+		//ResultSet registrationSet = registration.displayBooking();
+		
+		JPanel checkInP = new JPanel();
+		checkInP.setLayout(new BorderLayout());
 		
 		JPanel checkInDateP = new JPanel();
-		checkInDateP.setLayout(new BorderLayout());
+		checkInDateP.setLayout(new GridLayout(4,1));
 		
-		JPanel checkInDatePP = new JPanel();
-		checkInDatePP.setLayout(new GridLayout(2,1));
+		JPanel checkInGuestP = new JPanel();
+		checkInGuestP.setLayout(new GridLayout(2,1));
 		
-		JPanel checkInDateBottomP = new JPanel();
-		checkInDateBottomP.setLayout(new GridLayout(1,2));
+		JPanel firstNameP = new JPanel();
+		firstNameP.setLayout(new FlowLayout());
+		
+		JPanel lastNameP = new JPanel();
+		lastNameP.setLayout(new FlowLayout());
+		
+		JPanel checkInBottomP = new JPanel();
+		checkInBottomP.setLayout(new GridLayout(1,2));
 		
 		//JXDatePicker datePicker = new JXDatePicker();
 		//datePicker.setDate(Calendar.getInstance().getTime());
 		//datePicker.setFormates(new SimpleDateFormate("dd.MM.yyyy"));
-		SpinnerDateModel dateModel = new SpinnerDateModel();
-		JSpinner datePicker = new JSpinner(dateModel);
+		JLabel beginDateLabel = new JLabel("Begin:");
 		
+		beginDateModel = new SpinnerDateModel();
+		JSpinner beginDatePicker = new JSpinner(beginDateModel);
+		
+		JLabel endDateLabel = new JLabel("End:");
+		
+		endDateModel = new SpinnerDateModel();
+		JSpinner endDatePicker = new JSpinner(endDateModel);
 		//Calendar checkInCal = new GregorianCalendar(2000, Calendar.JANUARY, 1);
 		//datePicker.setValue(checkInCal.getTime());
 		
-		JButton checkInDateBackB = new JButton("Back");
-		checkInDateBackB.addActionListener(new checkInOutBackListener());
+		JLabel checkInIDFName = new JLabel("First Name:",SwingConstants.RIGHT);
+		checkInIDFNameField = new JTextField(20);
 		
-		JButton checkInDateB = new JButton("Confirm");
-		checkInDateB.addActionListener(new DateListener());
+		JLabel checkInIDLName = new JLabel("Last Name:",SwingConstants.RIGHT);
+		checkInIDLNameField = new JTextField(30);
 		
-		checkInDatePP.add(datePicker);
-		checkInDatePP.add(checkInDateBottomP);
-		checkInDateBottomP.add(checkInDateBackB);
-		checkInDateBottomP.add(checkInDateB);
-		checkInDateP.add(checkInDatePP, BorderLayout.CENTER);
-		checkInCards.add(checkInDateP);
-		c.add(checkInCards, "Check-In");
-		/*
-		 * Check-In ID
-		 */
-		JPanel checkInIDP = new JPanel();
-		checkInIDP.setLayout(new GridLayout(2,1));
+		JButton checkInBackB = new JButton("Back");
+		checkInBackB.addActionListener(new checkInOutBackListener());
 		
-		JPanel checkInIDCredP = new JPanel();
-		checkInIDCredP.setLayout(new GridLayout(1,7));
+		JButton checkInConfirmB = new JButton("Confirm");
+		checkInConfirmB.addActionListener(new CheckInListener());
 		
-		JLabel checkInIDFName = new JLabel("First Name:");
-		JTextField checkInIDFNameField = new JTextField(20);
-		JLabel checkInIDLName = new JLabel("Last Name:");
-		JTextField checkInIDLNameField = new JTextField(30);
-		JLabel checkInIDNum = new JLabel("ID Number:");
-		JTextField checkInIDNumField = new JTextField(9);
-		JButton checkInIDConfirm = new JButton("Submit");
-		checkInIDConfirm.addActionListener(new IDListener());
-		JButton checkInIDBackB = new JButton("Back");
-		checkInIDBackB.addActionListener(new checkInIDBackListener());
+		checkInDateP.add(beginDateLabel);
+		checkInDateP.add(beginDatePicker);
+		checkInDateP.add(endDateLabel);
+		checkInDateP.add(endDatePicker);
 		
-		checkInIDCredP.add(checkInIDFName);
-		checkInIDCredP.add(checkInIDFNameField);
-		checkInIDCredP.add(checkInIDLName);
-		checkInIDCredP.add(checkInIDLNameField);
-		checkInIDCredP.add(checkInIDNum);
-		checkInIDCredP.add(checkInIDNumField);
-		checkInIDCredP.add(checkInIDConfirm);
+		firstNameP.add(checkInIDFName);
+		firstNameP.add(checkInIDFNameField);
 		
-		checkInIDP.add(checkInIDCredP);
-		checkInIDP.add(checkInIDBackB);
+		lastNameP.add(checkInIDLName);
+		lastNameP.add(checkInIDLNameField);
 		
-		c.add(checkInIDP, "Check-In ID");
+		checkInGuestP.add(firstNameP);
+		checkInGuestP.add(lastNameP);
+		
+		checkInBottomP.add(checkInBackB);
+		checkInBottomP.add(checkInConfirmB);
+		
+		checkInP.add(roomScrollPane, BorderLayout.NORTH);
+		checkInP.add(checkInDateP, BorderLayout.WEST);
+		checkInP.add(checkInGuestP, BorderLayout.CENTER);
+		checkInP.add(checkInBottomP, BorderLayout.SOUTH);
+		c.add(checkInP, "Check-In");
+
 		/*
 		 * "Check-In Time"
 		 */
 		JPanel checkInTimeP = new JPanel();
 		checkInTimeP.setLayout(new GridLayout(2,1));
 		
-		JLabel checkInTime = new JLabel("Welcome to HOTEL NAME! Your Check-In Time is 2PM today! Enjoy your Stay!");
+		checkInTime = new JLabel("Welcome to HOTEL NAME! Your Check-In Time is 2PM today! Enjoy your Stay!");
 		checkInTime.setHorizontalAlignment(JLabel.CENTER);
 		
-		JButton checkInBackB = new JButton("Close");
-		checkInBackB.addActionListener(new BackButtonListener());
+		JButton checkInCloseB = new JButton("Reset");
+		checkInCloseB.addActionListener(new BackButtonListener());
 		
 		checkInTimeP.add(checkInTime);
-		checkInTimeP.add(checkInBackB);
+		checkInTimeP.add(checkInCloseB);
 		
 		c.add(checkInTimeP, "Check-In Time");
 		/*
@@ -552,12 +575,6 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, "Check-In/Out");
 		}
 	}
-	private class checkInIDBackListener implements ActionListener{
-		public void actionPerformed(ActionEvent event){
-			CardLayout cardLayout = (CardLayout)(c.getLayout());
-			cardLayout.show(c, "Check-In");
-		}
-	}
 	/*
 	 * This displays the current state of the selected room ie: after you select a room in the combobox, the checkboxes get checked if the room has those features
 	 */
@@ -622,17 +639,30 @@ public class mainPanel extends JPanel{
 			}
 		}
 	}
-	private class DateListener implements ActionListener{
+	private class CheckInListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
-			//if(datePicker.)
-			CardLayout cardLayout = (CardLayout)(c.getLayout());
-			cardLayout.show(c, "Check-In ID");
-		}
-	}
-	private class IDListener implements ActionListener{
-		public void actionPerformed(ActionEvent event){
-			CardLayout cardLayout = (CardLayout)(c.getLayout());
-			cardLayout.show(c, "Check-In Time");
+			if(roomTable.getSelectedRow() == -1){
+				return;
+			}
+			else{
+				try {
+					registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateModel.getDate(), endDateModel.getDate());
+				} catch (ClassNotFoundException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					ResultSet checkcheck = registration.displayBooking(beginDateModel.getDate(), endDateModel.getDate());
+					if (!checkcheck.isBeforeFirst()){
+						checkInTime.setText("Sorry, this room and date are already booked.");
+					}
+				} catch (ClassNotFoundException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				CardLayout cardLayout = (CardLayout)(c.getLayout());
+				cardLayout.show(c, "Check-In Time");
+			}
 		}
 	}
 	private class IDOutListener implements ActionListener{
