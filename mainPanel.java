@@ -661,6 +661,12 @@ public class mainPanel extends JPanel{
 			if(roomTable.getSelectedRow() == -1){
 				return;
 			}
+			else if(beginDateModel.getDate().before(new Date(System.currentTimeMillis()))){
+				return;
+			}
+			else if(beginDateModel.getDate().after(endDateModel.getDate())){
+				return;
+			}
 			else{
 				try {
 					registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateModel.getDate(), endDateModel.getDate());
