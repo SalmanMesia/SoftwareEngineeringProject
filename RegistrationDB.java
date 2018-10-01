@@ -100,8 +100,10 @@ public class RegistrationDB {
 		if(con == null) {
 			getConnection();
 		}
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 		Statement state = con.createStatement();
-		ResultSet res = state.executeQuery("SELECT fname, lname, Floor, Room, Check-In, Check-Out, Price FROM guests");
+		ResultSet res = state.executeQuery("SELECT fname, lname, Floor, Room, CheckIn, CheckOut, Price FROM guests WHERE CheckIn "
+				+ "BETWEEN '" + formatter.format(checking) + "' AND '" + formatter.format(checkout) + "';");
 		return res;	
 	}
 }
