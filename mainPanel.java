@@ -1,10 +1,16 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.CardLayout;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+import java.sql.*;
+import java.util.Vector;
 
 
 public class mainPanel extends JPanel{
@@ -12,12 +18,15 @@ public class mainPanel extends JPanel{
 	static String[][] maintenanceTickets = {{"4", "FIRE"},{"2", "Clean Pool"}};
 	static String[][] employees;
 	static String[][] hours;
-	static Object[] rooms; //array of room objects from the database
 	static String[][] sales;
 	static JPanel c;
-	static JPanel checkInCards;
-	
-	public mainPanel(){
+	static RoomsDB rooms = gui.rooms;
+	static JTable roomTable;
+	static JCheckBox cableCB;
+	static JCheckBox internetCB;
+	static JComboBox<Object> roomCB;
+	                                    
+	public mainPanel() throws ClassNotFoundException, SQLException{
 		//Establish main layout of our GUI
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
@@ -50,15 +59,17 @@ public class mainPanel extends JPanel{
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(2,1));
 		JPanel pInP = new JPanel();
-		pInP.setLayout(new GridLayout(1,3));
+		pInP.setLayout(new GridLayout(1,4));
 		
 		//Create Buttons
 		JButton payrollB = new JButton("Payroll");
+		JButton roomsB = new JButton("Rooms");
 		JButton maintB = new JButton("Maintenance");
 		JButton entertainB = new JButton("Entertainment");
 
 		//Add them to the horizontal Grid
 		pInP.add(payrollB);
+		pInP.add(roomsB);
 		pInP.add(maintB);
 		pInP.add(entertainB);
 		//Add horizontal Grid to a vertical Grid
@@ -72,12 +83,15 @@ public class mainPanel extends JPanel{
 		add(c,BorderLayout.CENTER);
 		//Add listeners
 		payrollB.addActionListener(new ButtonListener());
+		roomsB.addActionListener(new ButtonListener());
 		maintB.addActionListener(new ButtonListener());
 		entertainB.addActionListener(new ButtonListener());
 		checkinout.addActionListener(new ButtonListener());
+		
 		/*
 		 * Screen: "Payroll Menu"
 		 */
+		
 		//Pretty self-explanatory, just like the main menu.
 		JPanel payrollP = new JPanel();
 		payrollP.setLayout(new GridLayout(2,1));
@@ -100,9 +114,11 @@ public class mainPanel extends JPanel{
 		employeesB.addActionListener(new ButtonListener());
 		salesB.addActionListener(new ButtonListener());
 		backB.addActionListener(new BackButtonListener());
+		
 		/*
 		 * Screen: "Employees Menu"
 		 */
+		
 		JPanel employeeP = new JPanel();
 		employeeP.setLayout(new GridLayout(3,1));
 		
@@ -117,25 +133,12 @@ public class mainPanel extends JPanel{
 		employeeP.add(workSchedule);
 		employeeP.add(employeeBackB);
 		
-		
-		/*JPanel roomDummy = new JPanel();
-		roomDummy.setBorder(BorderFactory.createLineBorder(Color.black)); //add a line border to the JPanel
-		roomDummy.setLayout(new GridLayout(4,1));
-		JLabel roomDummyName = new JLabel("Name: Dummy Room");
-		JLabel roomDummyPlan = new JLabel("Plan: 0 Bed 0 Bath");
-		JLabel roomDummyPrice = new JLabel("Price: $0");
-		JLabel roomDummyVacancy = new JLabel("Status: Vacant");
-		
-		roomDummy.add(roomDummyName);
-		roomDummy.add(roomDummyPlan);
-		roomDummy.add(roomDummyPrice);
-		roomDummy.add(roomDummyVacancy);
-		roomsP.add(roomDummy);
-		*/
 		c.add(employeeP, "Employees");
+		
 		/*
 		 * Screen: "Sales"
 		 */
+		
 		JPanel salesP = new JPanel();
 		salesP.setLayout(new BorderLayout());
 
@@ -152,6 +155,44 @@ public class mainPanel extends JPanel{
 		salesP.add(salesTable, BorderLayout.CENTER);
 		
 		c.add(salesP, "Sales");
+		
+		/*
+		 * Screen: "Rooms"
+		 */
+		
+		JPanel roomsP = new JPanel();
+		roomsP.setLayout(new BorderLayout());
+		
+		ResultSet roomSet = rooms.displayRooms();
+		roomTable = new JTable(buildTableModel(roomSet));
+		
+		JScrollPane roomScrollPane = new JScrollPane(roomTable);
+		
+		JPanel roomInfoP = new JPanel();
+		
+		roomCB = new JComboBox<Object>(buildComboBoxModel(roomTable));
+		roomCB.addItemListener(new floorBoxListener());
+		
+		cableCB = new JCheckBox("Cable");
+		
+		internetCB = new JCheckBox("Internet");
+		
+		JButton roomChangeButton = new JButton("Change");
+		roomChangeButton.addActionListener(new roomChangeListener());
+		
+		JButton roomsBackB = new JButton("Back");
+		roomsBackB.addActionListener(new BackButtonListener());
+		
+		roomInfoP.add(roomCB);
+		roomInfoP.add(cableCB);
+		roomInfoP.add(internetCB);
+		roomInfoP.add(roomChangeButton);
+		
+		roomsP.add(roomScrollPane, BorderLayout.WEST);
+		roomsP.add(roomInfoP, BorderLayout.EAST);
+		roomsP.add(roomsBackB, BorderLayout.SOUTH);
+		
+		c.add(roomsP, "Rooms");
 
 		/*
 		 * Screen: "Maintenance Menu"
@@ -433,6 +474,48 @@ public class mainPanel extends JPanel{
 		
 		c.add(checkOutTimeP, "Check-Out Time");
 	}
+	public static DefaultTableModel buildTableModel(ResultSet rs) //stackoverflow/questions/10620448/
+		throws SQLException{
+		ResultSetMetaData metaData = rs.getMetaData();
+		
+		Vector<String> columnNames = new Vector<String>(); //get columnnames
+		//int columnCount = metaData.getColumnCount(); this line has no use for us since we know how many columns there are
+		for (int column = 1; column <= 6; column++){
+			columnNames.add(metaData.getColumnName(column));
+		}
+		
+		//table data
+		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		while (rs.next()){
+			Vector<Object> vector = new Vector<Object>();
+			for (int columnIndex = 1; columnIndex <= 6; columnIndex++){
+				if(columnIndex == 4 || columnIndex == 5){
+					if((int)rs.getObject(columnIndex)==1){
+						vector.add("Yes");
+					}
+					else
+						vector.add("No");
+				}
+				else
+					vector.add(rs.getObject(columnIndex));
+			}
+			data.add(vector);
+		}
+		return new DefaultTableModel(data,columnNames){
+			@Override
+			public boolean isCellEditable(int row, int column){
+				return false;
+			}
+		};
+	}
+	public static Vector<Object> buildComboBoxModel(JTable table){
+		Vector<Object> rooms = new Vector<Object>();
+		for(int room = 0; room < table.getRowCount(); room++){
+			rooms.add(table.getValueAt(room, 1));
+		}
+		return rooms;
+	}
+	
 	private class ButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
@@ -475,8 +558,70 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, "Check-In");
 		}
 	}
-	
-	
+	/*
+	 * This displays the current state of the selected room ie: after you select a room in the combobox, the checkboxes get checked if the room has those features
+	 */
+	private class floorBoxListener implements ItemListener{
+		@Override
+		public void itemStateChanged(ItemEvent event){
+			// TODO Auto-generated method stub
+			int thing = (Integer)event.getItem();
+			for(int i = 0; i<roomTable.getRowCount(); i++){
+				if ((int)roomTable.getValueAt(i,1) == thing){
+					cableCB.setSelected(true);
+					if(roomTable.getValueAt(i,3)=="Yes"){
+						cableCB.setSelected(true);
+					}
+					else
+						cableCB.setSelected(false);
+					if(roomTable.getValueAt(i,4)=="Yes"){
+						internetCB.setSelected(true);
+					}
+					else
+						internetCB.setSelected(false);
+				}
+			}
+		}
+	}
+	/*
+	 * This details what happens when you try to change the attributes of a room.
+	 */
+	private class roomChangeListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			try {
+				rooms.updateCable((int)roomCB.getSelectedItem(), cableCB.isSelected()); //This updates the database based on the status of the "Cable" checkbox
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				rooms.updateInternet((int)roomCB.getSelectedItem(), internetCB.isSelected()); //This updates the database based on the status of the "Internet" checkbox
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for(int i = 0;i < roomTable.getRowCount(); i++){
+				if((int)roomTable.getValueAt(i,1) == (int)roomCB.getSelectedItem()){
+					if(cableCB.isSelected()){
+						roomTable.setValueAt("Yes", i, 3);
+					}
+					else
+						roomTable.setValueAt("No", i, 3);
+					if(internetCB.isSelected()){
+						roomTable.setValueAt("Yes", i, 4);
+					}
+					else roomTable.setValueAt("No", i, 4);
+					try {
+						roomTable.setValueAt(rooms.getPrice(rooms.getRoomDetail((int)roomCB.getSelectedItem())), i, 5);
+					} catch (ClassNotFoundException | SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
 	private class DateListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			//if(datePicker.)

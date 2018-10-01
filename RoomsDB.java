@@ -111,6 +111,10 @@ public class RoomsDB {
 		internetPrice = newPrice;
 	}
 	
+	public String getPrice(ResultSet room) throws ClassNotFoundException, SQLException{
+		return room.getString(7);
+	}
+	
 //setRoomAvailability
 /*
 	public void updateAvail(int roomNumber, boolean available) throws ClassNotFoundException, SQLException {

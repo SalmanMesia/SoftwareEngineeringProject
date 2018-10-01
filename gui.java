@@ -1,8 +1,12 @@
 import javax.swing.*;
+import java.sql.*;
 
 public class gui extends JFrame{
-
-	public static void main(String[] args) {
+	static RoomsDB rooms = new RoomsDB();
+	static RegistrationDB registration = new RegistrationDB();
+	
+	public static void main(String[] args) throws ClassNotFoundException, SQLException {
+		
 		JFrame frame = new JFrame("HMS - Hotel Management System");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
