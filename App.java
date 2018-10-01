@@ -11,6 +11,8 @@ public class App {
 		
 		RoomsDB	test = new RoomsDB();
 		ResultSet rs;
+		ResultSet test_rs;
+		
 		
 		rs = test.displayRooms();
 		test.updatePrice(1010, 500);
@@ -30,10 +32,13 @@ public class App {
 		DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 		Date startDate = df.parse(startDateString);
 		Date endDate = df.parse(endDateString);
-		guest.addGuest("Alice", "Bob", 3, 304, startDate, endDate);
+//		guest.addGuest("Alice", "Bob", 3, 304, startDate, endDate);
 		while(res.next()) {
 			System.out.println(res.getString(1) + " " + res.getString(2) + " " + res.getInt(3) + " " + res.getInt(4) 
 			+	" " + res.getObject(5) + " " + res.getObject(6) + " " + res.getInt(7));
 		}
+		test_rs = test.getRoomDetail(105);
+
+		System.out.println(test.printRoom(test_rs));
 	}
 }

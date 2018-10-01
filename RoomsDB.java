@@ -24,7 +24,7 @@ public class RoomsDB {
 		}
 		
 		Statement state = con.createStatement();
-		ResultSet res = state.executeQuery("SELECT Floor, Room, Beds, Cable, Internet, Price, Available FROM rooms");
+		ResultSet res = state.executeQuery("SELECT Floor, Room, Beds, Cable, Internet, Price FROM rooms");
 		return res;
 		
 	}
@@ -47,17 +47,16 @@ public class RoomsDB {
 				Statement state2 = con.createStatement();
 
 				state2.execute("CREATE TABLE rooms("
-					+ "ID INT PRIMARY KEY," 
+					+ "ID INTEGER PRIMARY KEY," 
 					+ "Floor INT," 
 					+ "Room INT," 
 					+ "Beds INT," 
 					+ "Cable BOOLEAN," 
 					+ "Internet BOOLEAN," 
-					+ "Price INT,"
-					+ "Available BOOLEAN);");
+					+ "Price INT);");
 
 
-				PreparedStatement prep = con.prepareStatement("INSERT INTO rooms VALUES(?,?,?,?,?,?,?,?);");
+				PreparedStatement prep = con.prepareStatement("INSERT INTO rooms VALUES(?,?,?,?,?,?,?);");
 				
 				//populate floors and rooms
 				for(int i = 1; i <= MAX_FLOOR; i++) {
@@ -85,16 +84,12 @@ public class RoomsDB {
 						else {
 							prep.setInt(7, threeBedPrice);
 						}
-						prep.setBoolean(8, true);
 						prep.execute();
 					}
 				}				
 			}
 		}
 	}
-
-	//TO-DO: Set Ameneties
-	//Coupons?
 	
 	//Updates Price of a given room
 	public void updatePrice(int roomNumber, int price) throws ClassNotFoundException, SQLException {
@@ -116,7 +111,8 @@ public class RoomsDB {
 		internetPrice = newPrice;
 	}
 	
-	//setRoomAvailability
+//setRoomAvailability
+/*
 	public void updateAvail(int roomNumber, boolean available) throws ClassNotFoundException, SQLException {
 		if(con == null) {
 			getConnection();
@@ -125,7 +121,7 @@ public class RoomsDB {
 		PreparedStatement prep = con.prepareStatement("UPDATE rooms SET Available = " + avail + " WHERE Room = " + roomNumber + ";");
 		prep.executeUpdate();
 	}
-	
+*/	
 	
 	public void updateCable(int roomNumber, boolean cableVal) throws ClassNotFoundException, SQLException {
 		if(con == null) {
@@ -155,5 +151,21 @@ public class RoomsDB {
 		ResultSet res = s.executeQuery(query);
 		int newPrice = res.getInt(1);
 		updatePrice(roomNumber, newPrice = (internetVal) ? newPrice + internetPrice : newPrice - internetPrice); //Increase or decrease price
+	}
+	
+	//returns info on room
+	public ResultSet getRoomDetail(int roomNumber) throws ClassNotFoundException, SQLException {
+		if(con == null) {
+			getConnection();
+		}
+		Statement state = con.createStatement();
+		ResultSet res = state.executeQuery("SELECT * FROM rooms WHERE Room = '" + roomNumber + "';");
+		return res;
+	}
+
+	//prints room
+	public String printRoom(ResultSet test_rs) throws SQLException {
+		return test_rs.getInt(1) + " " + test_rs.getInt(2) + " " + test_rs.getInt(3) + " " + test_rs.getInt(4) + " " 
+				+ test_rs.getBoolean(5) + " " + test_rs.getBoolean(6)+ " " + test_rs.getInt(7);
 	}
 }
