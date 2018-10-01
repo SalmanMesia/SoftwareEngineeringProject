@@ -34,6 +34,8 @@ public class mainPanel extends JPanel{
 	static JCheckBox cableCB;
 	static JCheckBox internetCB;
 	static JComboBox<Object> roomCB;
+	static JPanel roomsP;
+	static JScrollPane roomScrollPane;
 	
 	/*
 	 * Static objects just for the Registration DB.
@@ -44,6 +46,7 @@ public class mainPanel extends JPanel{
 	static JTextField checkInIDFNameField;
 	static JTextField checkInIDLNameField;
 	static JLabel checkInTime;
+	static JPanel checkInP;
 	
 	public mainPanel() throws ClassNotFoundException, SQLException{
 		//Establish main layout of our GUI
@@ -102,7 +105,7 @@ public class mainPanel extends JPanel{
 		add(c,BorderLayout.CENTER);
 		//Add listeners
 		payrollB.addActionListener(new ButtonListener());
-		roomsB.addActionListener(new ButtonListener());
+		roomsB.addActionListener(new roomsButtonListener());
 		maintB.addActionListener(new ButtonListener());
 		entertainB.addActionListener(new ButtonListener());
 		checkinout.addActionListener(new ButtonListener());
@@ -179,13 +182,13 @@ public class mainPanel extends JPanel{
 		 * Screen: "Rooms"
 		 */
 		
-		JPanel roomsP = new JPanel();
+		roomsP = new JPanel();
 		roomsP.setLayout(new BorderLayout());
 		
 		ResultSet roomSet = rooms.displayRooms();
 		roomTable = new JTable(buildTableModel(roomSet));
 		
-		JScrollPane roomScrollPane = new JScrollPane(roomTable);
+		roomScrollPane = new JScrollPane(roomTable);
 		
 		JPanel roomInfoP = new JPanel();
 		
@@ -318,7 +321,7 @@ public class mainPanel extends JPanel{
 		
 		c.add(checkP, "Check-In/Out");
 		
-		checkInB.addActionListener(new ButtonListener());
+		checkInB.addActionListener(new checkInButtonListener());
 		checkOutB.addActionListener(new ButtonListener());
 		checkBackB.addActionListener(new BackButtonListener());
 		/*
@@ -364,7 +367,7 @@ public class mainPanel extends JPanel{
 		 */
 		//ResultSet registrationSet = registration.displayBooking();
 		
-		JPanel checkInP = new JPanel();
+		checkInP = new JPanel();
 		checkInP.setLayout(new BorderLayout());
 		
 		JPanel checkInDateP = new JPanel();
@@ -545,6 +548,20 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, event.getActionCommand());
 		}
 	}
+	private class roomsButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			roomsP.add(roomScrollPane, BorderLayout.WEST);
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c,  event.getActionCommand());
+		}
+	}
+	private class checkInButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			checkInP.add(roomScrollPane, BorderLayout.NORTH);
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, event.getActionCommand());
+		}
+	}
 	private class BackButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
@@ -656,6 +673,7 @@ public class mainPanel extends JPanel{
 					if (!checkcheck.isBeforeFirst()){
 						checkInTime.setText("Sorry, this room and date are already booked.");
 					}
+
 				} catch (ClassNotFoundException | SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
