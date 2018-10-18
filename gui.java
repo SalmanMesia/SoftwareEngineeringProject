@@ -6,6 +6,19 @@ public class gui extends JFrame{
 	static RegistrationDB registration = new RegistrationDB();
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
+		try {
+			UIManager.setLookAndFeel(
+					UIManager.getSystemLookAndFeelClassName());
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {}
 		
 		JFrame frame = new JFrame("HMS - Hotel Management System");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

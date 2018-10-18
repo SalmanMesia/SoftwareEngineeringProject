@@ -18,7 +18,7 @@ public class mainPanel extends JPanel{
 	 */
 	static JPanel c;
 	/*
-	 * This are placeholder variables that should be replaced by actual database objects.
+	 * These are placeholder variables that should be replaced by actual database objects.
 	 */
 	static String[] columnNames = {"Priority","Description"};
 	static String[][] maintenanceTickets = {{"4", "FIRE"},{"2", "Clean Pool"}};
@@ -75,6 +75,55 @@ public class mainPanel extends JPanel{
 		c.setPreferredSize(new Dimension(800,600));
 		c.setLayout(new CardLayout(1, 1)); //Purely cosmetic borders
 		
+		/*
+		 * Login Screen, yo
+		 */
+		JPanel loginP = new JPanel();
+		loginP.setLayout(new GridBagLayout());
+		loginP.setBackground(Color.WHITE);
+		
+		JPanel loginForm = new JPanel();
+		loginForm.setLayout(new GridLayout(3,1));
+		
+		JPanel loginUser = new JPanel();
+		loginUser.setLayout(new FlowLayout());
+		loginUser.setBackground(Color.WHITE);
+		
+		JPanel loginPassword = new JPanel();
+		loginPassword.setLayout(new FlowLayout());
+		loginPassword.setBackground(Color.WHITE);
+		
+		JPanel loginEtcP = new JPanel();
+		loginEtcP.setLayout(new FlowLayout());
+		loginEtcP.setBackground(Color.WHITE);
+		
+		JLabel usernameLabel = new JLabel("Username: ", JLabel.RIGHT);
+		JLabel passwordLabel = new JLabel("Password: ", JLabel.RIGHT);
+		
+		JTextField usernameField = new JTextField(20);
+		JTextField passwordField = new JTextField(20);
+		
+		JLabel loginMessage = new JLabel();
+		JButton loginButton = new JButton("Confirm");
+		
+		loginUser.add(usernameLabel);
+		loginUser.add(usernameField);
+		
+		loginPassword.add(passwordLabel);
+		loginPassword.add(passwordField);
+		
+		loginEtcP.add(loginMessage);
+		loginEtcP.add(loginButton);
+		
+		loginForm.add(loginUser);
+		loginForm.add(loginPassword);
+		loginForm.add(loginEtcP);
+		
+		loginP.add(loginForm);
+		
+		loginButton.addActionListener(new LoginListener());
+		
+		c.add(loginP, "Login");
 		/*
 		 * Main screen elements. This is done by nesting 2 gridlayouts.
 		 */
@@ -541,7 +590,15 @@ public class mainPanel extends JPanel{
 		}
 		return rooms;
 	}
-	
+	/*
+	 * placeholder listener until we get a working user database
+	 */
+	private class LoginListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, "main");
+		}
+	}
 	private class ButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
@@ -565,7 +622,7 @@ public class mainPanel extends JPanel{
 	private class BackButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
-			cardLayout.first(c);
+			cardLayout.show(c, "main");
 		}
 	}
 	private class payrollBackListener implements ActionListener{
@@ -675,9 +732,12 @@ public class mainPanel extends JPanel{
 					e.printStackTrace();
 				}
 				try {
-					ResultSet checkcheck = registration.displayBooking(beginDateModel.getDate(), endDateModel.getDate());
-					if (!checkcheck.isBeforeFirst()){
-						checkInTime.setText("Sorry, this room and date are already booked.");
+					//ResultSet checkcheck = registration.displayBooking(beginDateModel.getDate(), endDateModel.getDate());
+					//if (!checkcheck.isBeforeFirst()){
+					//	checkInTime.setText("Sorry, this room and date are already booked.");
+					if (!registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateModel.getDate(), endDateModel.getDate())){
+						JOptionPane.showMessageDialog(null, "Room already reserved!","Alert",JOptionPane.WARNING_MESSAGE);
+						return;
 					}
 
 				} catch (ClassNotFoundException | SQLException e) {

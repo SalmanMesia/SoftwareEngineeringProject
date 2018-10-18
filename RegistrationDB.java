@@ -71,7 +71,7 @@ public class RegistrationDB {
 	 * Returns a list of available rooms from RoomsDB
 	 * Front Desk chooses a floor, room, Check-In, Check-Out
 	 */
-	public void addGuest(String first_name, String last_name, int Floor, int Room, Date checking, Date checkout) throws ClassNotFoundException, SQLException {
+	public boolean addGuest(String first_name, String last_name, int Floor, int Room, Date checking, Date checkout) throws ClassNotFoundException, SQLException {
 		if(con == null) {
 			getConnection();
 		}
@@ -80,9 +80,8 @@ public class RegistrationDB {
 		Statement s = con.createStatement();
         String sql = "SELECT Room FROM guests WHERE Room = " + Room + " AND CheckIn BETWEEN '" + formatter.format(checking) + "' AND '" + formatter.format(checkout) + "'";
         ResultSet check = s.executeQuery(sql);
-		if(check.isBeforeFirst()) {
-        	 JOptionPane.showMessageDialog(null, "Room already reserved!","Alert",JOptionPane.WARNING_MESSAGE);     
-        	return;
+		if(check.isBeforeFirst()) {    
+        	return false;
 		}
 		else {
 			PreparedStatement prep = con.prepareStatement("INSERT INTO guests VALUES(?,?,?,?,?,?,?,?);");
@@ -96,6 +95,7 @@ public class RegistrationDB {
 			
 			prep.execute();		
 		}
+		return true;
 	}
 	
 	//Display Rooms boooked on certain date
