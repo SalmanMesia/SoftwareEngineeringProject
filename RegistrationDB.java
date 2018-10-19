@@ -13,7 +13,6 @@
 //CHECK-OUT: YYYY/MM/DD HH:MI:SS 
 //GUESTS: Number of Guests
 
-import javax.swing.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

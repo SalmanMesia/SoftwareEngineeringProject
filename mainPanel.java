@@ -41,12 +41,23 @@ public class mainPanel extends JPanel{
 	 * Static objects just for the Registration DB.
 	 */
 	static RegistrationDB registration = gui.registration;
-	static SpinnerDateModel beginDateModel;
-	static SpinnerDateModel endDateModel;
+	static SwingCalendar beginDateCalendar;
+	static SwingCalendar endDateCalendar;
 	static JTextField checkInIDFNameField;
 	static JTextField checkInIDLNameField;
 	static JLabel checkInTime;
 	static JPanel checkInP;
+	
+	/*
+	 * Static objects just for the Payroll DB.
+	 */
+	static PayrollDB payroll = gui.payroll;
+	static JTable employeeTable;
+	static JPanel employeeP;
+	static JScrollPane employeeScrollPane;
+
+
+
 	
 	public mainPanel() throws ClassNotFoundException, SQLException{
 		//Establish main layout of our GUI
@@ -124,6 +135,7 @@ public class mainPanel extends JPanel{
 		loginButton.addActionListener(new LoginListener());
 		
 		c.add(loginP, "Login");
+		
 		/*
 		 * Main screen elements. This is done by nesting 2 gridlayouts.
 		 */
@@ -136,7 +148,7 @@ public class mainPanel extends JPanel{
 		JButton payrollB = new JButton("Payroll");
 		JButton roomsB = new JButton("Rooms");
 		JButton maintB = new JButton("Maintenance");
-		JButton entertainB = new JButton("Entertainment");
+		JButton entertainB = new JButton("Events");
 
 		//Add them to the horizontal Grid
 		pInP.add(payrollB);
@@ -154,6 +166,7 @@ public class mainPanel extends JPanel{
 		add(c,BorderLayout.CENTER);
 		//Add listeners
 		payrollB.addActionListener(new ButtonListener());
+		//payrollB.addActionListener(new payrollButtonListener());
 		roomsB.addActionListener(new roomsButtonListener());
 		maintB.addActionListener(new ButtonListener());
 		entertainB.addActionListener(new ButtonListener());
@@ -191,18 +204,29 @@ public class mainPanel extends JPanel{
 		 */
 		
 		JPanel employeeP = new JPanel();
-		employeeP.setLayout(new GridLayout(3,1));
+		employeeP.setLayout(new GridLayout(2,1));
 		
-		JTable employeeTable = new JTable();
-		
-		JTable workSchedule = new JTable();
+		//JTable employeeTable = new JTable();
+		///////////////////////////////////////////////////////////////////////////
+		ResultSet payrollSet = payroll.displayPayroll();
+		JTable employeeTable = new JTable(buildTableModelp(payrollSet));
+		employeeScrollPane = new JScrollPane(employeeTable);
+		employeeP.add(employeeScrollPane);
+
+		//JTable workSchedule = new JTable();
 		
 		JButton employeeBackB = new JButton("Back");
 		employeeBackB.addActionListener(new payrollBackListener());
+		//employeeP.add(x);
+		//x.addActionListener(new payrollButtonListener());
+		employeesB.addActionListener(new payrollButtonListener());
+
+
 		
-		employeeP.add(employeeTable);
-		employeeP.add(workSchedule);
+		//employeeP.add(employeeTable);
+		//employeeP.add(workSchedule);
 		employeeP.add(employeeBackB);
+		//employeeP.add(employeesB);
 		
 		c.add(employeeP, "Employees");
 		
@@ -217,6 +241,13 @@ public class mainPanel extends JPanel{
 		
 		JLabel salesTitle = new JLabel("Sales");
 		salesTitle.setHorizontalAlignment(JLabel.CENTER);
+		//////////////////////////////////////////////////////////////////////
+		//updatePrice = new JTextField();
+		
+		
+		
+		
+		//////////////////////////////////////////////////////////////////////
 		
 		JButton salesBackB = new JButton("Back");
 		salesBackB.addActionListener(new payrollBackListener());
@@ -236,7 +267,6 @@ public class mainPanel extends JPanel{
 		
 		ResultSet roomSet = rooms.displayRooms();
 		roomTable = new JTable(buildTableModel(roomSet));
-		
 		roomScrollPane = new JScrollPane(roomTable);
 		
 		JPanel roomInfoP = new JPanel();
@@ -272,7 +302,7 @@ public class mainPanel extends JPanel{
 		maintP.setLayout(new BorderLayout());
 		
 		JPanel maintRequestP = new JPanel();
-		maintRequestP.setLayout(new GridLayout(1,2));
+		maintRequestP.setLayout(new GridLayout(1,3));
 		
 		JLabel maintLabel = new JLabel("Maintenance Tasks");
 		maintLabel.setFont(new Font("Times New Roman", Font.PLAIN, 44));
@@ -290,10 +320,13 @@ public class mainPanel extends JPanel{
 		JButton maintRequestB = new JButton("Maintenance Request");
 		maintRequestB.addActionListener(new ButtonListener());
 		
+		JButton maintDeleteB = new JButton("Complete Request");
+		
 		maintP.add(maintLabel, BorderLayout.NORTH);
 		maintP.add(maintScrollPane, BorderLayout.CENTER);
 		maintRequestP.add(maintBackB);
 		maintRequestP.add(maintRequestB);
+		maintRequestP.add(maintDeleteB);
 		maintP.add(maintRequestP, BorderLayout.SOUTH);
 		
 		c.add(maintP, "Maintenance");
@@ -322,33 +355,7 @@ public class mainPanel extends JPanel{
 		maintReqP.add(maintReqText, BorderLayout.CENTER);
 		
 		c.add(maintReqP, "Maintenance Request");
-		/*
-		 * Screen: "Entertainment"
-		 */
-		JPanel entertainP = new JPanel();
-		entertainP.setLayout(new GridLayout(2,1));
-		JPanel entertainPInP = new JPanel();
-		entertainPInP.setLayout(new GridLayout(1,2));
-		
-		JButton diningB = new JButton("Dining");
-		JButton eventB = new JButton("Event Spaces");
-		//JButton poolB = new JButton("Pool");
-		
-		entertainPInP.add(diningB);
-		entertainPInP.add(eventB);
-		//entertainPInP.add(poolB);
-		
-		entertainP.add(entertainPInP);
-		
-		JButton entertainBackB = new JButton("Back");
-		entertainP.add(entertainBackB);
-		
-		c.add(entertainP, "Entertainment");
-		
-		diningB.addActionListener(new ButtonListener());
-		eventB.addActionListener(new ButtonListener());
-		//poolB.addActionListener(new ButtonListener());
-		entertainBackB.addActionListener(new BackButtonListener());
+
 		/*
 		 * Check In/Check Out
 		 */
@@ -373,22 +380,7 @@ public class mainPanel extends JPanel{
 		checkInB.addActionListener(new checkInButtonListener());
 		checkOutB.addActionListener(new ButtonListener());
 		checkBackB.addActionListener(new BackButtonListener());
-		/*
-		 * "Dining"
-		 */
-		JPanel diningP = new JPanel();
-		diningP.setLayout(new GridLayout(2,1));
-		
-		JLabel diningMenu = new JLabel("MENU GOES HERE");
-		diningMenu.setHorizontalAlignment(JLabel.CENTER);
-		JButton diningBackB = new JButton("Back");
-		
-		diningBackB.addActionListener(new entertainmentBackListener());
-		
-		diningP.add(diningMenu);
-		diningP.add(diningBackB);
-		
-		c.add(diningP, "Dining");
+
 		/*
 		 * "Event Spaces"
 		 */
@@ -400,17 +392,17 @@ public class mainPanel extends JPanel{
 		JLabel eventMap = new JLabel("MAP GOES HERE");
 		eventMap.setHorizontalAlignment(JLabel.CENTER);
 		
-		JLabel eventSchedule = new JLabel("Schedule:\n9/12/2018 - Presentation Build #1 @ 2:30PM");
+		JLabel eventSchedule = new JLabel("Schedule:");
 		
 		JButton eventBackB = new JButton("Back");
-		eventBackB.addActionListener(new entertainmentBackListener());
+		eventBackB.addActionListener(new BackButtonListener());
 		
 		eventDataP.add(eventMap);
 		eventDataP.add(eventSchedule);
 		eventP.add(eventDataP);
 		eventP.add(eventBackB);
 		
-		c.add(eventP, "Event Spaces");
+		c.add(eventP, "Events");
 		/*
 		 * Check-In
 		 */
@@ -434,20 +426,14 @@ public class mainPanel extends JPanel{
 		JPanel checkInBottomP = new JPanel();
 		checkInBottomP.setLayout(new GridLayout(1,2));
 		
-		//JXDatePicker datePicker = new JXDatePicker();
-		//datePicker.setDate(Calendar.getInstance().getTime());
-		//datePicker.setFormates(new SimpleDateFormate("dd.MM.yyyy"));
-		JLabel beginDateLabel = new JLabel("Begin:");
+
+		JLabel beginDateLabel = new JLabel("Start Date:");
 		
-		beginDateModel = new SpinnerDateModel();
-		JSpinner beginDatePicker = new JSpinner(beginDateModel);
+		beginDateCalendar = new SwingCalendar();
 		
-		JLabel endDateLabel = new JLabel("End:");
+		JLabel endDateLabel = new JLabel("End Date:");
 		
-		endDateModel = new SpinnerDateModel();
-		JSpinner endDatePicker = new JSpinner(endDateModel);
-		//Calendar checkInCal = new GregorianCalendar(2000, Calendar.JANUARY, 1);
-		//datePicker.setValue(checkInCal.getTime());
+		endDateCalendar = new SwingCalendar();
 		
 		JLabel checkInIDFName = new JLabel("First Name:",SwingConstants.RIGHT);
 		checkInIDFNameField = new JTextField(20);
@@ -462,9 +448,9 @@ public class mainPanel extends JPanel{
 		checkInConfirmB.addActionListener(new CheckInListener());
 		
 		checkInDateP.add(beginDateLabel);
-		checkInDateP.add(beginDatePicker);
+		checkInDateP.add(beginDateCalendar);
 		checkInDateP.add(endDateLabel);
-		checkInDateP.add(endDatePicker);
+		checkInDateP.add(endDateCalendar);
 		
 		firstNameP.add(checkInIDFName);
 		firstNameP.add(checkInIDFNameField);
@@ -583,6 +569,39 @@ public class mainPanel extends JPanel{
 			}
 		};
 	}
+	
+	
+	//*******Payroll********/
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	public static DefaultTableModel buildTableModelp(ResultSet rs) //stackoverflow/questions/10620448/
+			throws SQLException{
+			ResultSetMetaData metaData = rs.getMetaData();
+			
+			Vector<String> columnNames = new Vector<String>(); //get columnnames
+			//int columnCount = metaData.getColumnCount(); this line has no use for us since we know how many columns there are
+			for (int column = 1; column <= 9; column++){
+				columnNames.add(metaData.getColumnName(column));
+			}
+			
+			//table data
+			Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+			while (rs.next()){
+				Vector<Object> vector = new Vector<Object>();
+				for (int columnIndex = 1; columnIndex <= 9; columnIndex++){
+					vector.add(rs.getObject(columnIndex));
+				}
+				data.add(vector);
+			}
+			return new DefaultTableModel(data,columnNames){
+				@Override
+				public boolean isCellEditable(int row, int column){
+					return false;
+				}
+			};
+		}
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
 	public static Vector<Object> buildComboBoxModel(JTable table){
 		Vector<Object> rooms = new Vector<Object>();
 		for(int room = 0; room < table.getRowCount(); room++){
@@ -631,18 +650,25 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, "Payroll");
 		}
 	}
+	
+	//*****Payroll********//
+	///////////////////////////////////////////////////////////////////////////////////////////
+	private class payrollButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			//employeeP.add(employeeScrollPane, BorderLayout.WEST);
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c,  event.getActionCommand());
+		}
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
 	private class maintReqBackListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
 			cardLayout.show(c, "Maintenance");
 		}
 	}
-	private class entertainmentBackListener implements ActionListener{
-		public void actionPerformed(ActionEvent event){
-			CardLayout cardLayout = (CardLayout)(c.getLayout());
-			cardLayout.show(c, "Entertainment");
-		}
-	}
+
 	private class checkInOutBackListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
@@ -718,24 +744,24 @@ public class mainPanel extends JPanel{
 			if(roomTable.getSelectedRow() == -1){
 				return;
 			}
-			else if(beginDateModel.getDate().before(new Date(System.currentTimeMillis()))){
+			else if(beginDateCalendar.getDate().before(new Date(System.currentTimeMillis()))){
 				return;
 			}
-			else if(beginDateModel.getDate().after(endDateModel.getDate())){
+			else if(beginDateCalendar.getDate().after(endDateCalendar.getDate())){
 				return;
 			}
 			else{
-				try {
-					registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateModel.getDate(), endDateModel.getDate());
-				} catch (ClassNotFoundException | SQLException e) {
+				//try {
+				//	registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateCalendar.getDate(), endDateCalendar.getDate());
+				//} catch (ClassNotFoundException | SQLException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				//	e.printStackTrace();
+				//}
 				try {
 					//ResultSet checkcheck = registration.displayBooking(beginDateModel.getDate(), endDateModel.getDate());
 					//if (!checkcheck.isBeforeFirst()){
 					//	checkInTime.setText("Sorry, this room and date are already booked.");
-					if (!registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateModel.getDate(), endDateModel.getDate())){
+					if (!registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateCalendar.getDate(), endDateCalendar.getDate())){
 						JOptionPane.showMessageDialog(null, "Room already reserved!","Alert",JOptionPane.WARNING_MESSAGE);
 						return;
 					}
