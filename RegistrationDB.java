@@ -108,4 +108,23 @@ public class RegistrationDB {
 				+ "BETWEEN '" + formatter.format(checking) + "' AND '" + formatter.format(checkout) + "';");
 		return res;	
 	}
+	
+	public boolean removeGuest(String firstName, String lastName) throws ClassNotFoundException, SQLException{
+		if(con == null) {
+			getConnection();
+		}
+		String query = "DELETE FROM guests WHERE fname = '" + firstName + "' AND lname = '" + lastName + "';";
+		PreparedStatement prep = con.prepareStatement(query);
+		prep.executeUpdate();
+		return true;
+	}
+	
+	public String printGuests(ResultSet res) throws SQLException {
+		String result = "";
+		while(res.next()) {
+			result += res.getString(1) + " " + res.getString(2) + " " + res.getInt(3) + " " + res.getInt(4) 
+			+	" " + res.getObject(5) + " " + res.getObject(6) + " " + res.getInt(7) +"\n";
+		}
+		return result;
+	}
 }
