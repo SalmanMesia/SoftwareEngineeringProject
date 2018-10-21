@@ -2,9 +2,6 @@ import javax.swing.*;
 import java.sql.*;
 
 public class gui extends JFrame{
-	static RoomsDB rooms = new RoomsDB();
-	static RegistrationDB registration = new RegistrationDB();
-	static PayrollDB payroll = new PayrollDB();
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 		try {

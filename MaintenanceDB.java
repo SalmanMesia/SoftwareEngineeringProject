@@ -88,7 +88,7 @@ public class MaintenanceDB {
 		}
 		try(ResultSet generatedKeys = prep.getGeneratedKeys()){
 			if(generatedKeys.next()) {
-				return generatedKeys.getInt(1)-1;
+				return generatedKeys.getInt(1);
 			}
 			else {
 				throw new SQLException("Insertion failed.");
@@ -101,7 +101,7 @@ public class MaintenanceDB {
 		if(con == null) {
 			getConnection();
 		}
-		String query = "DELETE FROM maintenance WHERE Ticketid = " + id + ";";
+		String query = "DELETE FROM maintenance WHERE TicketID = " + id + ";";
 		PreparedStatement prep = con.prepareStatement(query);
 		prep.executeUpdate();
 		return true;

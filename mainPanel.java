@@ -7,9 +7,14 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.table.TableRowSorter;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Vector;
+import java.util.List;
 
 
 public class mainPanel extends JPanel{
@@ -27,34 +32,47 @@ public class mainPanel extends JPanel{
 	static String[][] sales;
 	
 	/*
-	 * Static objects just for the Rooms DB.
+	 * objects just for the Rooms DB.
 	 */
-	static RoomsDB rooms = gui.rooms;
-	static JTable roomTable;
-	static JCheckBox cableCB;
-	static JCheckBox internetCB;
-	static JComboBox<Object> roomCB;
-	static JPanel roomsP;
-	static JScrollPane roomScrollPane;
+	RoomsDB rooms = new RoomsDB();
+	JTable roomTable;
+	JCheckBox cableCB;
+	JCheckBox internetCB;
+	JComboBox<Object> roomCB;
+	JPanel roomsP;
+	JScrollPane roomScrollPane;
+	
+	/*
+	 * Static objects for maintenance DB.
+	 */
+	MaintenanceDB maintenance = new MaintenanceDB();
+	JComboBox<Object> maintReqRoomCB;
+	JComboBox<Object> maintReqStatusCB;
+	JTextField maintReqText;
+	JTable maintTable;
+	TableRowSorter<DefaultTableModel> sorter;
 	
 	/*
 	 * Static objects just for the Registration DB.
 	 */
-	static RegistrationDB registration = gui.registration;
-	static SwingCalendar beginDateCalendar;
-	static SwingCalendar endDateCalendar;
-	static JTextField checkInIDFNameField;
-	static JTextField checkInIDLNameField;
-	static JLabel checkInTime;
-	static JPanel checkInP;
+	RegistrationDB registration = new RegistrationDB();
+	SwingCalendar beginDateCalendar;
+	SwingCalendar endDateCalendar;
+	JTextField checkInIDFNameField;
+	JTextField checkInIDLNameField;
+	JTextField checkOutIDFNameField;
+	JTextField checkOutIDLNameField;
+	JLabel checkOutMessage;
+	JLabel checkInTime;
+	JPanel checkInP;
 	
 	/*
 	 * Static objects just for the Payroll DB.
 	 */
-	static PayrollDB payroll = gui.payroll;
-	static JTable employeeTable;
-	static JPanel employeeP;
-	static JScrollPane employeeScrollPane;
+	PayrollDB payroll = new PayrollDB();
+	JTable employeeTable;
+	JPanel employeeP;
+	JScrollPane employeeScrollPane;
 
 
 
@@ -83,7 +101,7 @@ public class mainPanel extends JPanel{
 		//Onto the other elements. The Menu bar should be consistent throughout the program.
 		
 		c = new JPanel();//This CardLayout is how we essentially 'switch screens'
-		c.setPreferredSize(new Dimension(800,600));
+		c.setPreferredSize(new Dimension(800,800));
 		c.setLayout(new CardLayout(1, 1)); //Purely cosmetic borders
 		
 		/*
@@ -308,11 +326,18 @@ public class mainPanel extends JPanel{
 		maintLabel.setFont(new Font("Times New Roman", Font.PLAIN, 44));
 		maintLabel.setHorizontalAlignment(JLabel.CENTER);
 		
-		JTable maintTable = new JTable(maintenanceTickets, columnNames);
+		ResultSet maintSet = maintenance.displayTickets();
+		maintTable = new JTable(buildTableModelDefault(maintSet));
 		maintTable.setFillsViewportHeight(true);
 		
+		sorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel)maintTable.getModel());
+		maintTable.setRowSorter(sorter);
+		
+		List<RowSorter.SortKey> sortKeys = new ArrayList<>(25);
+		sortKeys.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
+		sorter.setSortKeys(sortKeys);
+		
 		JScrollPane maintScrollPane = new JScrollPane(maintTable);
-		maintTable.setFillsViewportHeight(true);
 		
 		JButton maintBackB = new JButton("Back");
 		maintBackB.addActionListener(new BackButtonListener());
@@ -320,7 +345,8 @@ public class mainPanel extends JPanel{
 		JButton maintRequestB = new JButton("Maintenance Request");
 		maintRequestB.addActionListener(new ButtonListener());
 		
-		JButton maintDeleteB = new JButton("Complete Request");
+		JButton maintDeleteB = new JButton("Remove Request");
+		maintDeleteB.addActionListener(new MaintRemoveListener());
 		
 		maintP.add(maintLabel, BorderLayout.NORTH);
 		maintP.add(maintScrollPane, BorderLayout.CENTER);
@@ -335,27 +361,55 @@ public class mainPanel extends JPanel{
 		 */
 		JPanel maintReqP = new JPanel();
 		maintReqP.setLayout(new BorderLayout());
+		
 		JPanel maintReqBotP = new JPanel();
 		maintReqBotP.setLayout(new GridLayout(1,2));
 		
+		JPanel maintReqRoomP = new JPanel();
+		maintReqRoomP.setLayout(new FlowLayout());
+		
+		JPanel maintReqStatusP = new JPanel();
+		maintReqStatusP.setLayout(new FlowLayout());
+		
+		JPanel maintReqTextP = new JPanel();
+		maintReqTextP.setLayout(new FlowLayout());
+		
 		JLabel maintReqLabel = new JLabel("Enter Request:");
 		maintReqLabel.setHorizontalAlignment(JLabel.CENTER);
-		JTextArea maintReqText = new JTextArea();
+		
+		JLabel maintReqRoomL = new JLabel("Room:");
+		maintReqRoomCB = new JComboBox<Object>(buildComboBoxModel(roomTable));
+		
+		JLabel maintReqStatusL = new JLabel("Severity:");
+		String[] statuses = {"1","2","3","4"};
+		maintReqStatusCB = new JComboBox<Object>(statuses);
+		
+		maintReqText = new JTextField(20);
+		
 		JButton maintReqBackB = new JButton("Back");
 		JButton maintReqSubmitB = new JButton("Submit");
 		
 		maintReqBackB.addActionListener(new maintReqBackListener());
-		//maintReqSubmitB.addActionListener();
+		maintReqSubmitB.addActionListener( new MaintRequestListener());
 		
+		maintReqRoomP.add(maintReqRoomL);
+		maintReqRoomP.add(maintReqRoomCB);
+		
+		maintReqStatusP.add(maintReqStatusL);
+		maintReqStatusP.add(maintReqStatusCB);
+		
+		maintReqTextP.add(maintReqRoomP);
+		maintReqTextP.add(maintReqStatusP);
+		maintReqTextP.add(maintReqText);
 		
 		maintReqBotP.add(maintReqBackB);
 		maintReqBotP.add(maintReqSubmitB);
+		
 		maintReqP.add(maintReqLabel, BorderLayout.NORTH);
 		maintReqP.add(maintReqBotP, BorderLayout.SOUTH);
-		maintReqP.add(maintReqText, BorderLayout.CENTER);
+		maintReqP.add(maintReqTextP, BorderLayout.CENTER);
 		
 		c.add(maintReqP, "Maintenance Request");
-
 		/*
 		 * Check In/Check Out
 		 */
@@ -476,7 +530,7 @@ public class mainPanel extends JPanel{
 		JPanel checkInTimeP = new JPanel();
 		checkInTimeP.setLayout(new GridLayout(2,1));
 		
-		checkInTime = new JLabel("Welcome to HOTEL NAME! Your Check-In Time is 2PM today! Enjoy your Stay!");
+		checkInTime = new JLabel("Check-In Success! Enjoy your Stay!");
 		checkInTime.setHorizontalAlignment(JLabel.CENTER);
 		
 		JButton checkInCloseB = new JButton("Reset");
@@ -493,16 +547,17 @@ public class mainPanel extends JPanel{
 		checkOutIDP.setLayout(new GridLayout(2,1));
 		
 		JPanel checkOutIDCredP = new JPanel();
-		checkOutIDCredP.setLayout(new GridLayout(1,7));
+		checkOutIDCredP.setLayout(new FlowLayout());
 		
 		JLabel checkOutIDFName = new JLabel("First Name:");
-		JTextField checkOutIDFNameField = new JTextField(20);
+		checkOutIDFNameField = new JTextField(20);
 		JLabel checkOutIDLName = new JLabel("Last Name:");
-		JTextField checkOutIDLNameField = new JTextField(30);
-		JLabel checkOutIDNum = new JLabel("ID Number:");
-		JTextField checkOutIDNumField = new JTextField(9);
+		checkOutIDLNameField = new JTextField(30);
+		//JLabel checkOutIDNum = new JLabel("ID Number:");
+		//JTextField checkOutIDNumField = new JTextField(9);
 		JButton checkOutIDConfirm = new JButton("Submit");
 		checkOutIDConfirm.addActionListener(new IDOutListener());
+		checkOutMessage = new JLabel();
 		JButton checkOutIDBackB = new JButton("Back");
 		checkOutIDBackB.addActionListener(new checkInOutBackListener());
 		
@@ -510,9 +565,10 @@ public class mainPanel extends JPanel{
 		checkOutIDCredP.add(checkOutIDFNameField);
 		checkOutIDCredP.add(checkOutIDLName);
 		checkOutIDCredP.add(checkOutIDLNameField);
-		checkOutIDCredP.add(checkOutIDNum);
-		checkOutIDCredP.add(checkOutIDNumField);
+		//checkOutIDCredP.add(checkOutIDNum);
+		//checkOutIDCredP.add(checkOutIDNumField);
 		checkOutIDCredP.add(checkOutIDConfirm);
+		checkOutIDCredP.add(checkOutMessage);
 		
 		checkOutIDP.add(checkOutIDCredP);
 		checkOutIDP.add(checkOutIDBackB);
@@ -524,7 +580,7 @@ public class mainPanel extends JPanel{
 		JPanel checkOutTimeP = new JPanel();
 		checkOutTimeP.setLayout(new GridLayout(2,1));
 		
-		JLabel checkOutTime = new JLabel("Your Check-Out Time is in like 2 hours! We hope you enjoyed your Stay!");
+		JLabel checkOutTime = new JLabel("Thanks for Checking Out! Please come again!");
 		checkOutTime.setHorizontalAlignment(JLabel.CENTER);
 		
 		JButton checkOutBackB = new JButton("Close");
@@ -568,6 +624,31 @@ public class mainPanel extends JPanel{
 				return false;
 			}
 		};
+	}
+	public static DefaultTableModel buildTableModelDefault(ResultSet rs)
+			throws SQLException{
+			ResultSetMetaData metaData = rs.getMetaData();
+			
+			Vector<String> columnNames = new Vector<String>();
+			int columnCount = metaData.getColumnCount();
+			for(int column = 1; column <= columnCount; column++) {
+				columnNames.add(metaData.getColumnName(column));
+			}
+			
+			Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+			while (rs.next()) {
+				Vector<Object> vector = new Vector<Object>();
+				for(int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+					vector.add(rs.getObject(columnIndex));
+				}
+				data.add(vector);
+			}
+			return new DefaultTableModel(data, columnNames) {
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					return false;
+				}
+			};
 	}
 	
 	
@@ -777,8 +858,62 @@ public class mainPanel extends JPanel{
 	}
 	private class IDOutListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
-			CardLayout cardLayout = (CardLayout)(c.getLayout());
-			cardLayout.show(c, "Check-Out Time");
+			try {
+				if(registration.removeGuest(checkOutIDFNameField.getText(), checkOutIDLNameField.getText())) {
+					CardLayout cardLayout = (CardLayout)(c.getLayout());
+					cardLayout.show(c, "Check-Out Time");
+				}
+				else
+					checkOutMessage.setText("Check-Out Unsuccessful.");
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	private class MaintRequestListener implements ActionListener{
+		public void actionPerformed(ActionEvent event) {
+			int id = 0;
+			if(maintReqText.getText() == "" || maintReqText.getText() == null) {
+				return;
+			}
+			try {
+				id = maintenance.addTicket((int)maintReqRoomCB.getSelectedItem(), Integer.parseInt((String)maintReqStatusCB.getSelectedItem()), maintReqText.getText());
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			DefaultTableModel model = (DefaultTableModel) maintTable.getModel();
+			Vector<Object> vector = new Vector<Object>();
+			vector.add(id);
+			vector.add(maintReqRoomCB.getSelectedItem());
+			vector.add(maintReqStatusCB.getSelectedItem());
+			vector.add(maintReqText.getText());
+			model.addRow(vector);
+			maintTable.setModel(model);
+			sorter.setModel(model);
+			maintReqText.setText("");
+		}
+	}
+	private class MaintRemoveListener implements ActionListener{
+		public void actionPerformed(ActionEvent event) {
+			if (maintTable.getSelectedRow()==-1) {
+				maintTable.clearSelection();
+				return;
+			}
+			System.out.println(maintTable.getValueAt(maintTable.getSelectedRow(),0));
+			try {
+				if(maintenance.removeTicket((int)maintTable.getValueAt(maintTable.getSelectedRow(), 0))) {
+					DefaultTableModel model = (DefaultTableModel)maintTable.getModel();
+					model.removeRow(maintTable.getSelectedRow());
+					maintTable.setModel(model);
+					sorter.setModel(model);
+				}
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			maintTable.clearSelection();
 		}
 	}
 }

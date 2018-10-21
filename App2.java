@@ -12,7 +12,7 @@ public class App2 {
 		MaintenanceDB test = new MaintenanceDB();
 		ResultSet rs;
 //		test.updateDescription(1, "There is a fire in the room.");
-//		test.removeTicket(1);
+	test.removeTicket(1);
 		rs = test.displayTickets();
 		System.out.println(test.printLogs(rs));
 		rs = test.descOrder(rs);
