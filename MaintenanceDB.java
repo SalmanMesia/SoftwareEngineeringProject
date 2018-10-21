@@ -65,6 +65,7 @@ public class MaintenanceDB {
 	}
 	
 	//Add Ticket
+	/*
 	public void addTicket(int roomNumber, int sev, String desc) throws ClassNotFoundException, SQLException {
 		if(con == null) {
 			getConnection();
@@ -72,6 +73,27 @@ public class MaintenanceDB {
 		String query = "INSERT INTO maintenance(Room, Severity, Description) VALUES ('" + roomNumber + "', '" + sev + "', '"+ desc + "');";
 		PreparedStatement prep = con.prepareStatement(query);
 		prep.executeUpdate();
+	}
+	*/
+	//ADD TICKET & RETURN ID
+	public int addTicket(int roomNumber, int sev, String desc) throws ClassNotFoundException, SQLException {
+		if(con == null) {
+			getConnection();
+		}
+		String query = "INSERT INTO maintenance(Room, Severity, Description) VALUES ('" + roomNumber + "', '" + sev + "', '"+ desc + "');";
+		PreparedStatement prep = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+		int success = prep.executeUpdate();
+		if (success == 0) {
+			throw new SQLException("Insertion failed.");
+		}
+		try(ResultSet generatedKeys = prep.getGeneratedKeys()){
+			if(generatedKeys.next()) {
+				return generatedKeys.getInt(1)-1;
+			}
+			else {
+				throw new SQLException("Insertion failed.");
+			}
+		}
 	}
 	
 	//Removes a ticket
