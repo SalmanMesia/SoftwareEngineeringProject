@@ -115,8 +115,13 @@ public class RegistrationDB {
 		}
 		String query = "DELETE FROM guests WHERE fname = '" + firstName + "' AND lname = '" + lastName + "';";
 		PreparedStatement prep = con.prepareStatement(query);
-		prep.executeUpdate();
-		return true;
+		int checkSuccess = prep.executeUpdate();
+		if(checkSuccess == 0) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 	
 	public String printGuests(ResultSet res) throws SQLException {
