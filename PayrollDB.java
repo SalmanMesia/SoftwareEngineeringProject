@@ -10,8 +10,9 @@ public class PayrollDB{
 	private static Connection con;
 	private static boolean hasData = false;
 	final int employees[] = new int[20];
-	String shift[] = {"Morning", "Afternoon", "Night", "Off"};
-	
+	final String shift[] = {"Morning", "Afternoon", "Night", "Off"};
+	RoomsDB r = new RoomsDB();
+	ResultSet rss = null;
 	
 	public ResultSet displayPayroll() throws ClassNotFoundException, SQLException {
 		if(con == null) {
@@ -42,55 +43,58 @@ public class PayrollDB{
 				Statement state2 = con.createStatement();
 
 				state2.execute("CREATE TABLE payroll("
-					+ "ID INTEGER PRIMARY KEY," 
-					+ "Employee INT," 
-					+ "Sunday STRING," 
-					+ "Monday STRING," 
-					+ "Tuesday STRING,"
-					+ "Wednesday STRING,"
-					+ "Thursday STRING,"
-					+ "Friday STRING,"
-					+ "Saturday STRING," 
+					+ "Employee INTEGER PRIMARY KEY," 
+					+ "Sunday varchar(255)," 
+					+ "Monday varchar(255)," 
+					+ "Tuesday varchar(255),"
+					+ "Wednesday varchar(255),"
+					+ "Thursday varchar(255),"
+					+ "Friday varchar(255),"
+					+ "Saturday varchar(255)," 
 					+ "Wages INT);");
 				
-				PreparedStatement prep = con.prepareStatement("INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?,?);");
+				//String sql = "INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?,?);"
+				PreparedStatement pre = con.prepareStatement("INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?);");
+				//Statement pre = con.createStatement();
+				//pre.execute("INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?,?);");
+				
+				for(int i=1; i<20; i++) {
+					
+					//pre.setInt(2, i);
 
-				for(int i=0; i<employees.length; i++) {
-					
 					Random rand = new Random();
-					int s = rand.nextInt(4)+1;
-					prep.setInt(2, i);
-					prep.setString(3, shift[s]);
-					int m = rand.nextInt(4)+1;
-					prep.setString(4, shift[m]);
-					int t = rand.nextInt(4)+1;
-					prep.setString(5, shift[t]);
-					int w = rand.nextInt(4)+1;
-					prep.setString(6, shift[w]);
-					int tr = rand.nextInt(4)+1;
-					prep.setString(7, shift[tr]);
-					int f = rand.nextInt(4)+1;
-					prep.setString(8, shift[f]);
-					int st = rand.nextInt(4)+1;
-					prep.setString(9, shift[st]);
+					int s = rand.nextInt(3)+1;
+					pre.setString(2, shift[s]);
+					int m = rand.nextInt(3)+1;
+					pre.setString(3, shift[m]);
+					int t = rand.nextInt(3)+1;
+					pre.setString(4, shift[t]);
+					int w = rand.nextInt(3)+1;
+					pre.setString(5, shift[w]);
+					int tr = rand.nextInt(3)+1;
+					pre.setString(6, shift[tr]);
+					int f = rand.nextInt(3)+1;
+					pre.setString(7, shift[f]);
+					int st = rand.nextInt(3)+1;
+					pre.setString(8, shift[st]);
 					
-					int salary = 10;
-					prep.setInt(10, salary);
+					int salary = 9;
+					pre.setInt(9, salary);
 					
-					prep.execute();
+					pre.execute();
+				
 				}
 					
 					
-
+				//display(rss);
 
 
 				}
 		}
+		//con.commit();
 	}
 	
 	
-	
-	//returns info on room
 		public ResultSet getpayrollDetail(int employee) throws ClassNotFoundException, SQLException {
 			if(con == null) {
 				getConnection();
@@ -100,16 +104,13 @@ public class PayrollDB{
 			return res;
 		}
 
-		//prints room
+		//prints payroll
 		public String printPayroll(ResultSet test_rs) throws SQLException {
-			return test_rs.getInt(1) + " " + test_rs.getInt(2) + " " + test_rs.getString(3) + " " + test_rs.getString(4) + " " 
-					+ test_rs.getString(5) + " " + test_rs.getString(6)+ " " + test_rs.getString(7)+ " " +
-					test_rs.getString(8)+" " +test_rs.getString(9)+" " + test_rs.getInt(10);
+			return test_rs.getInt(1) + " " + test_rs.getString(2) + " " + test_rs.getString(3) + " " 
+					+ test_rs.getString(4) + " " + test_rs.getString(5)+ " " + test_rs.getString(6)+ " " +
+					test_rs.getString(7)+" " +test_rs.getString(8)+" " + test_rs.getInt(9);
 		}
-	
-	
-	
-	
+		
 	
 		
 	

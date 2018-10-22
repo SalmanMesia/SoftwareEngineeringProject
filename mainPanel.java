@@ -25,11 +25,11 @@ public class mainPanel extends JPanel{
 	/*
 	 * These are placeholder variables that should be replaced by actual database objects.
 	 */
-	static String[] columnNames = {"Priority","Description"};
-	static String[][] maintenanceTickets = {{"4", "FIRE"},{"2", "Clean Pool"}};
 	static String[][] employees;
 	static String[][] hours;
 	static String[][] sales;
+	
+	String str;
 	
 	/*
 	 * objects just for the Rooms DB.
@@ -43,7 +43,7 @@ public class mainPanel extends JPanel{
 	JScrollPane roomScrollPane;
 	
 	/*
-	 * Static objects for maintenance DB.
+	 * objects for maintenance DB.
 	 */
 	MaintenanceDB maintenance = new MaintenanceDB();
 	JComboBox<Object> maintReqRoomCB;
@@ -53,7 +53,7 @@ public class mainPanel extends JPanel{
 	TableRowSorter<DefaultTableModel> sorter;
 	
 	/*
-	 * Static objects just for the Registration DB.
+	 * objects just for the Registration DB.
 	 */
 	RegistrationDB registration = new RegistrationDB();
 	SwingCalendar beginDateCalendar;
@@ -67,13 +67,17 @@ public class mainPanel extends JPanel{
 	JPanel checkInP;
 	
 	/*
-	 * Static objects just for the Payroll DB.
+	 * objects just for the Payroll DB.
 	 */
 	PayrollDB payroll = new PayrollDB();
 	JTable employeeTable;
 	JPanel employeeP;
 	JScrollPane employeeScrollPane;
-
+	JTable salesTable;
+	/////////////////
+	JPanel salesP;
+	JScrollPane roomScrollPane2;
+	JComboBox<Object> roomCB2;
 
 
 	
@@ -229,7 +233,6 @@ public class mainPanel extends JPanel{
 		ResultSet payrollSet = payroll.displayPayroll();
 		JTable employeeTable = new JTable(buildTableModelp(payrollSet));
 		employeeScrollPane = new JScrollPane(employeeTable);
-		employeeP.add(employeeScrollPane);
 
 		//JTable workSchedule = new JTable();
 		
@@ -239,9 +242,7 @@ public class mainPanel extends JPanel{
 		//x.addActionListener(new payrollButtonListener());
 		employeesB.addActionListener(new payrollButtonListener());
 
-
-		
-		//employeeP.add(employeeTable);
+		employeeP.add(employeeScrollPane);
 		//employeeP.add(workSchedule);
 		employeeP.add(employeeBackB);
 		//employeeP.add(employeesB);
@@ -254,17 +255,58 @@ public class mainPanel extends JPanel{
 		
 		JPanel salesP = new JPanel();
 		salesP.setLayout(new BorderLayout());
+		JButton button = new JButton("UPDATE PRICE");
+		//updatePrice.addActionListener(new ButtonListener());
+		
+		JPanel chooseR = new JPanel(); //choose room to update price
+		JPanel updateP = new JPanel(); //update price panel
 
-		JTable salesTable = new JTable();
+		//JTable salesTable = new JTable();
 		
 		JLabel salesTitle = new JLabel("Sales");
 		salesTitle.setHorizontalAlignment(JLabel.CENTER);
 		//////////////////////////////////////////////////////////////////////
+		//roomsP2 = new JPanel();
+		salesP.setLayout(new BorderLayout());
+		
+		ResultSet roomSet2 = rooms.displayRooms();
+		salesTable = new JTable(buildTableModel(roomSet2));
+		roomScrollPane2 = new JScrollPane(salesTable);
+		
+		JPanel roomInfoP2 = new JPanel();
+		
+		roomCB2 = new JComboBox<Object>(buildComboBoxModel(salesTable));
+		//roomCB2.addItemListener(new floorBoxListener2());
+		
+		//cableCB = new JCheckBox("Cable");
+		
+		//internetCB = new JCheckBox("Internet");
+		
+		//JButton roomChangeButton = new JButton("Change");
+		//roomChangeButton.addActionListener(new roomChangeListener());
+		
+		JButton roomsBackB = new JButton("Back");
+		roomsBackB.addActionListener(new BackButtonListener());
+		
+		roomInfoP2.add(roomCB2);
+		//roomInfoP2.add(cableCB);
+		//roomInfoP2.add(internetCB);
+		//roomInfoP2.add(roomChangeButton);
+		salesP.add(roomScrollPane2, BorderLayout.WEST);
+		salesP.add(roomInfoP2, BorderLayout.EAST);
+		salesP.add(roomsBackB, BorderLayout.SOUTH);
+		button.add(salesTable);
+		//button.addActionListener(new comboSelect());
+		//c.add(roomsP, "Rooms");
+		
 		//updatePrice = new JTextField();
 		
-		
-		
-		
+		//chooseR.add(roomCB);
+		//salesP.add(roomScrollPane, BorderLayout.WEST);
+		//roomCB.addItemListener(new floorBoxListener());
+		//JButton changePriceButton = new JButton("Change Price");
+		//salesP.add(chooseR);
+		//changePriceButton.addActionListener(new roomChangeListener());
 		//////////////////////////////////////////////////////////////////////
 		
 		JButton salesBackB = new JButton("Back");
@@ -273,6 +315,8 @@ public class mainPanel extends JPanel{
 		salesP.add(salesTitle, BorderLayout.NORTH);
 		salesP.add(salesBackB, BorderLayout.SOUTH);
 		salesP.add(salesTable, BorderLayout.CENTER);
+		salesP.add(button, BorderLayout.WEST);
+		//salesP.add(price, BorderLayout.EAST);
 		
 		c.add(salesP, "Sales");
 		
@@ -299,8 +343,11 @@ public class mainPanel extends JPanel{
 		JButton roomChangeButton = new JButton("Change");
 		roomChangeButton.addActionListener(new roomChangeListener());
 		
-		JButton roomsBackB = new JButton("Back");
-		roomsBackB.addActionListener(new BackButtonListener());
+		//JButton roomsBackB = new JButton("Back");
+		//roomsBackB.addActionListener(new BackButtonListener());
+		
+		JButton roomsBackB2 = new JButton("Back");
+		roomsBackB2.addActionListener(new BackButtonListener());
 		
 		roomInfoP.add(roomCB);
 		roomInfoP.add(cableCB);
@@ -309,7 +356,8 @@ public class mainPanel extends JPanel{
 		
 		roomsP.add(roomScrollPane, BorderLayout.WEST);
 		roomsP.add(roomInfoP, BorderLayout.EAST);
-		roomsP.add(roomsBackB, BorderLayout.SOUTH);
+		//roomsP.add(roomsBackB, BorderLayout.SOUTH);
+		roomsP.add(roomsBackB2, BorderLayout.SOUTH);
 		
 		c.add(roomsP, "Rooms");
 
@@ -712,6 +760,14 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c,  event.getActionCommand());
 		}
 	}
+	///////////////////////////////
+	private class roomsButtonListener2 implements ActionListener{
+		public void actionPerformed(ActionEvent event) {
+			salesP.add(roomScrollPane2, BorderLayout.WEST);
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, event.getActionCommand());
+		}
+	}
 	private class checkInButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			checkInP.add(roomScrollPane, BorderLayout.NORTH);
@@ -749,7 +805,14 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, "Maintenance");
 		}
 	}
-
+	////////////////////////////////////////////////////////////////////////////////////////////
+	private class entertainmentBackListener implements ActionListener{
+		public void actionPerformed(ActionEvent event) {
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c,  "Entertainment");
+		}
+	}
+/////////////////////////////////////////////////////////////////////////////////////////
 	private class checkInOutBackListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
