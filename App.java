@@ -13,7 +13,7 @@ public class App {
 		ResultSet rs;
 		ResultSet test_rs;
 		
-		
+/*		
 		rs = test.displayRooms();
 		test.updatePrice(1010, 500);
 		test.updateCable(1009, true);
@@ -23,7 +23,9 @@ public class App {
 			System.out.println(rs.getInt(1) + " " + rs.getInt(2) + " " + rs.getInt(3) + " " + rs.getBoolean(4) + " " + rs.getBoolean(5)+ " " + 
 		rs.getInt(6));
 		}
-		
+*/
+
+/*		
 		RegistrationDB guest = new RegistrationDB();
 		ResultSet res;
 		res = guest.displayGuests();
@@ -38,6 +40,8 @@ public class App {
 			+	" " + res.getObject(5) + " " + res.getObject(6) + " " + res.getInt(7));
 		}
 		test_rs = test.getRoomDetail(105);
+*/
+
 /*
  * CREATE TEST DATES HERE BY REPLACING YYYY/MM/DD and UNCOMMENT
  * 		String startDateString = "YYYY/MM/DD";
@@ -47,6 +51,7 @@ public class App {
 		Date endDate = df.parse(endDateString);
 
  */
+/*
 		System.out.println(test.printRoom(test_rs));
 		test_rs = guest.displayBooking(startDate, endDate);
 		if (!test_rs.isBeforeFirst() ) {    
@@ -55,5 +60,17 @@ public class App {
 			System.out.println(test_rs.getString(1) + " " + test_rs.getString(2) + " " + test_rs.getInt(3) + " " + test_rs.getInt(4) 
 			+	" " + test_rs.getObject(5) + " " + test_rs.getObject(6) + " " + test_rs.getInt(7));
 		}
+*/
+		PayrollDB pay = new PayrollDB();
+		rs = pay.displayPayroll();
+		System.out.println(pay.weeklyTotal());
+		while(rs.next()) {
+			System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getString(3) + " " + rs.getString(4) + " " + rs.getString(5)
+			+ " " + rs.getString(6) + " " + rs.getString(7) + " " + rs.getString(8) + " " + rs.getString(9) + " " + rs.getString(10));
+		}
+		pay.updateShift("Morning", "Tuesday", 1);
+		pay.updateWage(10, 1);
+		//pay.removeEmployee(24);
+		System.out.println(pay.generateReport());
 	}
 }
