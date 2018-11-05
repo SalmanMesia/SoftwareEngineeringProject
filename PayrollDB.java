@@ -15,6 +15,7 @@ public class PayrollDB{
 	final int employees[] = new int[20];
 	final String shift[] = {"Morning", "Afternoon", "Night", "Off"};
 	final String days[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+	final double hoursPerDay = 8;
 	RoomsDB r = new RoomsDB();
 	ResultSet rss = null;
 	
@@ -48,7 +49,8 @@ public class PayrollDB{
 
 				state2.execute("CREATE TABLE payroll("
 					+ "EmployeeID INTEGER PRIMARY KEY," 
-					+ "Name varchar(255),"	
+					+ "Name varchar(255),"
+					+ "Position varchar(255),"
 					+ "Sunday varchar(255)," 
 					+ "Monday varchar(255)," 
 					+ "Tuesday varchar(255),"
@@ -59,7 +61,7 @@ public class PayrollDB{
 					+ "Wages DOUBLE);");
 				
 				//String sql = "INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?,?);"
-				PreparedStatement pre = con.prepareStatement("INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?,?);");
+				PreparedStatement pre = con.prepareStatement("INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?,?,?);");
 				//Statement pre = con.createStatement();
 				//pre.execute("INSERT INTO payroll VALUES(?,?,?,?,?,?,?,?,?,?);");
 				
@@ -67,24 +69,25 @@ public class PayrollDB{
 					
 					//pre.setInt(2, i);
 					pre.setString(2, populateNames(i));
+					pre.setString(3, "Receptionist");
 					Random rand = new Random();
 					int s = rand.nextInt(3)+1;
-					pre.setString(3, shift[s]);
+					pre.setString(4, shift[s]);
 					int m = rand.nextInt(3)+1;
-					pre.setString(4, shift[m]);
+					pre.setString(5, shift[m]);
 					int t = rand.nextInt(3)+1;
-					pre.setString(5, shift[t]);
+					pre.setString(6, shift[t]);
 					int w = rand.nextInt(3)+1;
-					pre.setString(6, shift[w]);
+					pre.setString(7, shift[w]);
 					int tr = rand.nextInt(3)+1;
-					pre.setString(7, shift[tr]);
+					pre.setString(8, shift[tr]);
 					int f = rand.nextInt(3)+1;
-					pre.setString(8, shift[f]);
+					pre.setString(9, shift[f]);
 					int st = rand.nextInt(3)+1;
-					pre.setString(9, shift[st]);
+					pre.setString(10, shift[st]);
 					
 					double salary = 7.25;
-					pre.setDouble(10, salary);					
+					pre.setDouble(11, salary);					
 					pre.execute();				
 				}		
 			}
@@ -105,7 +108,7 @@ public class PayrollDB{
 	public String printPayroll(ResultSet test_rs) throws SQLException {
 		return test_rs.getInt(1) + " " + test_rs.getString(2) + " " + test_rs.getString(3) + " " + test_rs.getString(4) + " " 
 				+ test_rs.getString(5) + " " + test_rs.getString(6)+ " " + test_rs.getString(7)+ " " +
-				test_rs.getString(8)+" " +test_rs.getString(9)+" " + test_rs.getInt(10);
+				test_rs.getString(8)+" " +test_rs.getString(9)+" " + " " + test_rs.getString(10) + " " + test_rs.getDouble(11);
 	}
 	
 	//returns weekly total of each employee
@@ -122,14 +125,14 @@ public class PayrollDB{
 			int daysWorked = 0;
 			//DEBUG
 			//System.out.println("Employee: " + res.getInt(1));
-			for(int i = 3; i < 10; i++) {
+			for(int i = 4; i < 11; i++) {
 				if(!res.getString(i).equals("Off")) {
 					daysWorked++;
 					//DEBUG
 					//System.out.print(" Shift " +i+ ": " + res.getString(i));
 				}
 			}
-			total += daysWorked * res.getDouble(10) * 8;
+			total += daysWorked * res.getDouble(11) * hoursPerDay;
 			//DEBUG
 			//System.out.println("\nTotal so far: " + total);
 		}
@@ -185,13 +188,23 @@ public class PayrollDB{
 		return true;
 	}
 	
-	//Add new Employee
-	public boolean addEmployee(String empName, double newWage) throws SQLException, ClassNotFoundException{
+	public boolean updatePosition(String newPosition, int empID) throws SQLException, ClassNotFoundException{
 		if(con == null) {
 			getConnection();
 		}
-		String query = "INSERT INTO payroll(Name, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Wages) VALUES ('" + 
-		empName + "', 'Off', 'Off', 'Off', 'Off', 'Off', 'Off', 'Off', '"+ newWage + "');";
+		String query = "UPDATE payroll SET Position = '" + newPosition + "' WHERE EmployeeID = '" + empID + "';";
+		PreparedStatement prep = con.prepareStatement(query);
+		prep.executeUpdate();
+		return true;
+	}
+	
+	//Add new Employee with position
+	public boolean addEmployee(String empName, String newPosition, double newWage) throws SQLException, ClassNotFoundException{
+		if(con == null) {
+			getConnection();
+		}
+		String query = "INSERT INTO payroll(Name, Position, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Wages) VALUES ('" + 
+		empName + "', '" + newPosition + "' ,'Off', 'Off', 'Off', 'Off', 'Off', 'Off', 'Off', '"+ newWage + "');";
 		PreparedStatement prep = con.prepareStatement(query);
 		prep.executeUpdate();
 		return true;
@@ -268,8 +281,8 @@ public class PayrollDB{
 				+ "--------------------------------------------------------\n";
 		for(int i = 0; i < days.length; i++) {
 			report += "=========================================================================================================\n";
-			String title = String.format("%-32s %-20s \t %-10s \t %-13s \t\t %-6s \n", 
-					"NAME", days[dayCount].toUpperCase() + " SHIFT", "PAY", "HOURS WORKED", "TOTAL");
+			String title = String.format("%-32s %-32s %-20s \t %-10s \t %-13s \t\t %-6s \n", 
+					"NAME", "POSITION", days[dayCount].toUpperCase() + " SHIFT", "PAY", "HOURS WORKED", "TOTAL");
 			report += title;
 			report += "=========================================================================================================\n";
 
@@ -280,8 +293,8 @@ public class PayrollDB{
 			ResultSet res = state.executeQuery(query);
 
 			while(res.next()) {
-				String temp = String.format("%-32s %-20s \t $%-4.2f/hr \t %.1f \t\t\t $%.2f \n", 
-						res.getString(2), res.getString(dayCount+3), res.getDouble(10), 8.0, res.getDouble(10) * 8);
+				String temp = String.format("%-32s %-32s %-20s \t $%-4.2f/hr \t %.1f \t\t\t $%.2f \n", 
+						res.getString(2), res.getString(3), res.getString(dayCount+4), res.getDouble(11), hoursPerDay, res.getDouble(11) * hoursPerDay);
 				report += temp;
 			}
 			dayCount++;
