@@ -4,11 +4,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
 import javax.swing.table.TableRowSorter;
 
 import java.sql.*;
@@ -78,8 +77,28 @@ public class mainPanel extends JPanel{
 	JPanel salesP;
 	JScrollPane roomScrollPane2;
 	JComboBox<Object> roomCB2;
+	
+	/*
+	 * objects just for the Events DB.
+	 */
 
+	EventsDB events = new EventsDB();
+	JTable eventsTable;
+	JPanel eventsP;
+	JScrollPane eventsScrollPane;
+	JComboBox<Object> eventsCB;
 
+	/*
+	 * objects just for the Users DB.
+	 */
+	
+	UserDB users = new UserDB();
+	JTextField usernameField;
+	JPasswordField passwordField;
+	JTable userTable;
+	JScrollPane userScrollPane;
+	JFrame check;
+	
 	
 	public mainPanel() throws ClassNotFoundException, SQLException{
 		//Establish main layout of our GUI
@@ -133,8 +152,12 @@ public class mainPanel extends JPanel{
 		JLabel usernameLabel = new JLabel("Username: ", JLabel.RIGHT);
 		JLabel passwordLabel = new JLabel("Password: ", JLabel.RIGHT);
 		
-		JTextField usernameField = new JTextField(20);
-		JTextField passwordField = new JTextField(20);
+		usernameField = new JTextField(20);
+		passwordField = new JPasswordField(20);
+		ResultSet userSet = users.displayUsers();
+		userTable = new JTable(buildTableModelu(userSet));
+		userScrollPane = new JScrollPane(userTable);
+		userTable.setVisible(false);
 		
 		JLabel loginMessage = new JLabel();
 		JButton loginButton = new JButton("Confirm");
@@ -148,13 +171,17 @@ public class mainPanel extends JPanel{
 		loginEtcP.add(loginMessage);
 		loginEtcP.add(loginButton);
 		
+		
 		loginForm.add(loginUser);
 		loginForm.add(loginPassword);
 		loginForm.add(loginEtcP);
 		
 		loginP.add(loginForm);
+		loginP.add(userTable);
 		
-		loginButton.addActionListener(new LoginListener());
+		loginButton.addActionListener(new LoginListener2());
+		
+		passwordField.addKeyListener(new LoginListener3());
 		
 		c.add(loginP, "Login");
 		
@@ -228,6 +255,9 @@ public class mainPanel extends JPanel{
 		JPanel employeeP = new JPanel();
 		employeeP.setLayout(new GridLayout(2,1));
 		
+		JPanel employeeBottomP = new JPanel();
+		employeeBottomP.setLayout(new GridLayout(1,2));
+		
 		//JTable employeeTable = new JTable();
 		///////////////////////////////////////////////////////////////////////////
 		ResultSet payrollSet = payroll.displayPayroll();
@@ -240,11 +270,17 @@ public class mainPanel extends JPanel{
 		employeeBackB.addActionListener(new payrollBackListener());
 		//employeeP.add(x);
 		//x.addActionListener(new payrollButtonListener());
-		employeesB.addActionListener(new payrollButtonListener());
+		//employeesB.addActionListener(new payrollButtonListener());
+		
+		JButton generateReportB = new JButton("Generate Report");
+		generateReportB.addActionListener(new PayrollGenerateListener());
 
+		employeeBottomP.add(employeeBackB);
+		employeeBottomP.add(generateReportB);
+		
 		employeeP.add(employeeScrollPane);
 		//employeeP.add(workSchedule);
-		employeeP.add(employeeBackB);
+		employeeP.add(employeeBottomP);
 		//employeeP.add(employeesB);
 		
 		c.add(employeeP, "Employees");
@@ -487,22 +523,41 @@ public class mainPanel extends JPanel{
 		 * "Event Spaces"
 		 */
 		JPanel eventP = new JPanel();
-		eventP.setLayout(new GridLayout(2,1));
+		eventP.setLayout(new BorderLayout());
 		JPanel eventDataP = new JPanel();
 		eventDataP.setLayout(new GridLayout(1,2));
+		JButton buttonss = new JButton("Reserve Ticket");
 		
-		JLabel eventMap = new JLabel("MAP GOES HERE");
-		eventMap.setHorizontalAlignment(JLabel.CENTER);
+		ResultSet eventSet = events.displayEvents();
+		eventsTable = new JTable(buildTableModele(eventSet));
+		eventsScrollPane = new JScrollPane(eventsTable);
 		
-		JLabel eventSchedule = new JLabel("Schedule:");
+		JPanel event2 = new JPanel();
+		eventsCB = new JComboBox<Object>(buildComboBoxModele(eventsTable));
+		eventsCB.addItemListener(new floorBoxListener2());
+
+		buttonss.addActionListener(new ticket());
+		event2.add(eventsCB, BorderLayout.EAST);
+		//event2.add(buttonss, BorderLayout.SOUTH);
+		eventP.add(eventsScrollPane, BorderLayout.NORTH);
+		eventP.add(event2, BorderLayout.EAST);
+		//eventP.add(button);
+		//eventP.add(eventBackB, BorderLayout.SOUTH);
+		//buttonss.add(eventsTable);
+		eventP.add(buttonss);
+		
+		//JLabel eventMap = new JLabel("MAP GOES HERE");
+		//.removeAll()eventMap.setHorizontalAlignment(JLabel.CENTER);
+		
+		//JLabel eventSchedule = new JLabel("Schedule:");
 		
 		JButton eventBackB = new JButton("Back");
 		eventBackB.addActionListener(new BackButtonListener());
 		
-		eventDataP.add(eventMap);
-		eventDataP.add(eventSchedule);
-		eventP.add(eventDataP);
-		eventP.add(eventBackB);
+		//eventDataP.add(eventMap);
+		//eventDataP.add(eventSchedule);
+		//eventP.add(eventDataP);
+		eventP.add(eventBackB, BorderLayout.SOUTH);
 		
 		c.add(eventP, "Events");
 		/*
@@ -639,6 +694,37 @@ public class mainPanel extends JPanel{
 		
 		c.add(checkOutTimeP, "Check-Out Time");
 	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	public static DefaultTableModel buildTableModelu(ResultSet rs) //stackoverflow/questions/10620448/
+			throws SQLException{
+			ResultSetMetaData metaData = rs.getMetaData();
+			
+			Vector<String> columnNames = new Vector<String>(); //get columnnames
+			//int columnCount = metaData.getColumnCount(); this line has no use for us since we know how many columns there are
+			for (int column = 1; column <= 2; column++){
+				columnNames.add(metaData.getColumnName(column));
+			}
+			
+			//table data
+			Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+			while (rs.next()){
+				Vector<Object> vector = new Vector<Object>();
+				for (int columnIndex = 1; columnIndex <= 2; columnIndex++){
+					vector.add(rs.getObject(columnIndex));
+				}
+				data.add(vector);
+			}
+			return new DefaultTableModel(data,columnNames){
+				@Override
+				public boolean isCellEditable(int row, int column){
+					return false;
+				}
+			};
+		}
+	
+		///////////	//////////////////////////////////////////////////////////////////////////////////////////
+	
 	public static DefaultTableModel buildTableModel(ResultSet rs) //stackoverflow/questions/10620448/
 		throws SQLException{
 		ResultSetMetaData metaData = rs.getMetaData();
@@ -699,16 +785,15 @@ public class mainPanel extends JPanel{
 			};
 	}
 	
-	
-	//*******Payroll********/
+	//*******EVENTS*********//
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	public static DefaultTableModel buildTableModelp(ResultSet rs) //stackoverflow/questions/10620448/
+	public static DefaultTableModel buildTableModele(ResultSet rs) //stackoverflow/questions/10620448/
 			throws SQLException{
 			ResultSetMetaData metaData = rs.getMetaData();
 			
 			Vector<String> columnNames = new Vector<String>(); //get columnnames
 			//int columnCount = metaData.getColumnCount(); this line has no use for us since we know how many columns there are
-			for (int column = 1; column <= 9; column++){
+			for (int column = 1; column <= 10; column++){
 				columnNames.add(metaData.getColumnName(column));
 			}
 			
@@ -716,7 +801,7 @@ public class mainPanel extends JPanel{
 			Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 			while (rs.next()){
 				Vector<Object> vector = new Vector<Object>();
-				for (int columnIndex = 1; columnIndex <= 9; columnIndex++){
+				for (int columnIndex = 1; columnIndex <= 10; columnIndex++){
 					vector.add(rs.getObject(columnIndex));
 				}
 				data.add(vector);
@@ -728,6 +813,65 @@ public class mainPanel extends JPanel{
 				}
 			};
 		}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	//*******Payroll********/
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	public static DefaultTableModel buildTableModelp(ResultSet rs) //stackoverflow/questions/10620448/
+			throws SQLException{
+			ResultSetMetaData metaData = rs.getMetaData();
+			
+			Vector<String> columnNames = new Vector<String>(); //get columnnames
+			//int columnCount = metaData.getColumnCount(); this line has no use for us since we know how many columns there are
+			for (int column = 1; column <= 11; column++){
+				columnNames.add(metaData.getColumnName(column));
+			}
+			
+			//table data
+			Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+			while (rs.next()){
+				Vector<Object> vector = new Vector<Object>();
+				for (int columnIndex = 1; columnIndex <= 11; columnIndex++){
+					vector.add(rs.getObject(columnIndex));
+				}
+				data.add(vector);
+			}
+			return new DefaultTableModel(data,columnNames){
+				@Override
+				public boolean isCellEditable(int row, int column){
+					return false;
+				}
+			};
+		}
+	//********GENERATE PAYROLL****************//
+	private class PayrollGenerateListener implements ActionListener{
+		public void actionPerformed(ActionEvent event) {
+			try {
+				//stackoverflow/83575022
+				JTextArea textArea = new JTextArea(payroll.generateReport());
+				JScrollPane scrollPane = new JScrollPane(textArea);
+				textArea.setLineWrap(true);
+				textArea.setWrapStyleWord(true);
+				scrollPane.setPreferredSize(new Dimension(1280,720));
+				JOptionPane.showMessageDialog(null, scrollPane,"Payroll Report",JOptionPane.INFORMATION_MESSAGE);
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	//**********Events*************//
+	///////////////////////////////////////////////////////////////////////////////////////////
+	public static Vector<Object> buildComboBoxModele(JTable table){
+		Vector<Object> events = new Vector<Object>();
+		for(int event = 0; event < table.getRowCount(); event++){
+			events.add(table.getValueAt(event, 0));
+		}
+		return events;
+	}
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -745,6 +889,7 @@ public class mainPanel extends JPanel{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
 			cardLayout.show(c, "main");
+			check.dispose();
 		}
 	}
 	private class ButtonListener implements ActionListener{
@@ -819,6 +964,29 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, "Check-In/Out");
 		}
 	}
+	
+	//*********Events************//
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	private class floorBoxListener2 implements ItemListener{
+		@Override
+		public void itemStateChanged(ItemEvent event){
+			// TODO Auto-generated method stub
+			int thing = (Integer)event.getItem();
+			for(int i = 0; i<eventsTable.getRowCount(); i++){
+				if ((int)eventsTable.getValueAt(i, 0) == thing){
+					eventsCB.setSelectedItem(true);
+				}
+					else {
+						eventsCB.setSelectedItem(false);
+					
+			}
+		}
+	}
+	}
+
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	/*
 	 * This displays the current state of the selected room ie: after you select a room in the combobox, the checkboxes get checked if the room has those features
 	 */
@@ -979,4 +1147,142 @@ public class mainPanel extends JPanel{
 			maintTable.clearSelection();
 		}
 	}
-}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	private class ticket implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			
+			for(int i = 0;i < eventsTable.getRowCount(); i++){
+				if((int)eventsTable.getValueAt(i,0) == (int)eventsCB.getSelectedItem()){
+					eventsTable.setValueAt(((int)eventsTable.getValueAt(i, 1))-1, i, 1);
+					eventsTable.setValueAt(((double)eventsTable.getValueAt(i, 9))+5, i, 9);
+
+					}
+					
+				}
+			}
+		}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//closes the jframe
+	private class checkButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			
+			check.dispose();
+		
+	}
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	//****LOGIN*****//
+	private class LoginListener2 implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			String username = usernameField.getText();
+			String password = new String(passwordField.getPassword());
+			boolean found = false;
+			
+			
+			//checks to see if username and password match
+				for(int i=0; i<userTable.getRowCount(); i++) {
+					String un = (String)userTable.getValueAt(i, 0);
+					String pw = (String)userTable.getValueAt(i, 1);
+					if(un.equals(username) && pw.equals(password)){
+						found=true;
+						break;
+					}
+					else {
+						
+						found=false;
+				}
+					
+			}
+				if(found) {
+					JButton button = new JButton("OK");
+					check = new JFrame();
+					check.setSize(300,300);
+					Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+					check.setLocation(dim.width/2-check.getSize().width/2, dim.height/2-check.getSize().height/2);
+					check.setLayout(new FlowLayout());
+					JLabel label = new JLabel("Login Successful");
+					check.add(label);
+					check.add(button);
+					button.addActionListener(new LoginListener());
+					check.setVisible(true);
+				}
+				else {
+					JButton button = new JButton("Try again");
+					check = new JFrame();
+					check.setSize(300,300);
+					Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+					check.setLocation(dim.width/2-check.getSize().width/2, dim.height/2-check.getSize().height/2);
+					check.setLayout(new FlowLayout());
+					JLabel label = new JLabel("Incorrect UserName/Password");
+					check.add(label);
+					check.add(button);
+					button.addActionListener(new checkButtonListener());
+					check.setVisible(true);
+				}
+		}
+	}
+	
+	//This is to allow login by just pressing ENTER in the passwordfield
+	private class LoginListener3 implements KeyListener{
+		public void keyPressed(KeyEvent e) {
+			if(e.getKeyCode()==KeyEvent.VK_ENTER) {
+				String username = usernameField.getText();
+				String password = new String(passwordField.getPassword());
+				boolean found = false;
+				
+				
+				//checks to see if username and password match
+					for(int i=0; i<userTable.getRowCount(); i++) {
+						String un = (String)userTable.getValueAt(i, 0);
+						String pw = (String)userTable.getValueAt(i, 1);
+						if(un.equals(username) && pw.equals(password)){
+							found=true;
+							break;
+						}
+						else {
+							
+							found=false;
+					}
+						
+				}
+					if(found) {
+						JButton button = new JButton("OK");
+						check = new JFrame();
+						check.setSize(300,300);
+						Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+						check.setLocation(dim.width/2-check.getSize().width/2, dim.height/2-check.getSize().height/2);
+						check.setLayout(new FlowLayout());
+						JLabel label = new JLabel("Login Successful");
+						check.add(label);
+						check.add(button);
+						button.addActionListener(new LoginListener());
+						check.setVisible(true);
+					}
+					else {
+						JButton button = new JButton("Try again");
+						check = new JFrame();
+						check.setSize(300,300);
+						Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+						check.setLocation(dim.width/2-check.getSize().width/2, dim.height/2-check.getSize().height/2);
+						check.setLayout(new FlowLayout());
+						JLabel label = new JLabel("Incorrect UserName/Password");
+						check.add(label);
+						check.add(button);
+						button.addActionListener(new checkButtonListener());
+						check.setVisible(true);
+					}
+			}
+		}
+		public void keyReleased(KeyEvent arg0) {
+		}
+		public void keyTyped(KeyEvent arg0) {
+			
+		}
+	}
+	}
