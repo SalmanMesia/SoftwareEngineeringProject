@@ -12,8 +12,8 @@ public class RoomsDB {
 	private static boolean hasData = false;
 	final int MAX_FLOOR = 10; //maximum number of floors in hotel
 	final int MAX_ROOM = 10; //maximum number of rooms in hotel
-	int cablePrice = 50;
-	int internetPrice = 25;
+	double cablePrice = 50;
+	double internetPrice = 25;
 	int oneBedPrice = 125;
 	int twoBedPrice = 200;
 	int threeBedPrice = 250; //includes Cable/Internet
@@ -53,7 +53,7 @@ public class RoomsDB {
 					+ "Beds INT," 
 					+ "Cable BOOLEAN," 
 					+ "Internet BOOLEAN," 
-					+ "Price INT);");
+					+ "Price DOUBLE);");
 
 
 				PreparedStatement prep = con.prepareStatement("INSERT INTO rooms VALUES(?,?,?,?,?,?,?);");
@@ -76,13 +76,13 @@ public class RoomsDB {
 						prep.setBoolean(5, false); //No Cable
 						prep.setBoolean(6, false); //No Internet
 						if(j <= 4) {
-							prep.setInt(7, oneBedPrice);
+							prep.setDouble(7, oneBedPrice);
 						}
 						else if (j <= 8) {
-							prep.setInt(7, twoBedPrice);
+							prep.setDouble(7, twoBedPrice);
 						}
 						else {
-							prep.setInt(7, threeBedPrice);
+							prep.setDouble(7, threeBedPrice);
 						}
 						prep.execute();
 					}
@@ -92,7 +92,7 @@ public class RoomsDB {
 	}
 	
 	//Updates Price of a given room
-	public void updatePrice(int roomNumber, int price) throws ClassNotFoundException, SQLException {
+	public void updatePrice(int roomNumber, double price) throws ClassNotFoundException, SQLException {
 		if(con == null) {
 			getConnection();
 		}
@@ -102,12 +102,12 @@ public class RoomsDB {
 	}
 	
 	//change cable price
-	public void setCablePrice(int newPrice) {
+	public void setCablePrice(double newPrice) {
 		cablePrice = newPrice;
 	}
 	
 	//change internet price
-	public void setInternetPrice(int newPrice) {
+	public void setInternetPrice(double newPrice) {
 		internetPrice = newPrice;
 	}
 	
@@ -138,7 +138,7 @@ public class RoomsDB {
 		query = "SELECT Price FROM rooms WHERE Room = " + roomNumber + ";"; 
 		Statement s = con.createStatement();
 		ResultSet res = s.executeQuery(query);
-		int newPrice = res.getInt(1);
+		double newPrice = res.getDouble(1);
 		updatePrice(roomNumber, newPrice = (cableVal) ? newPrice + cablePrice : newPrice - cablePrice); //Increase or decrease price
 	}
 	
@@ -153,7 +153,7 @@ public class RoomsDB {
 		query = "SELECT Price FROM rooms WHERE Room = " + roomNumber + ";"; 
 		Statement s = con.createStatement();
 		ResultSet res = s.executeQuery(query);
-		int newPrice = res.getInt(1);
+		double newPrice = res.getDouble(1);
 		updatePrice(roomNumber, newPrice = (internetVal) ? newPrice + internetPrice : newPrice - internetPrice); //Increase or decrease price
 	}
 	
@@ -170,6 +170,6 @@ public class RoomsDB {
 	//prints room
 	public String printRoom(ResultSet test_rs) throws SQLException {
 		return test_rs.getInt(1) + " " + test_rs.getInt(2) + " " + test_rs.getInt(3) + " " + test_rs.getInt(4) + " " 
-				+ test_rs.getBoolean(5) + " " + test_rs.getBoolean(6)+ " " + test_rs.getInt(7);
+				+ test_rs.getBoolean(5) + " " + test_rs.getBoolean(6)+ " " + test_rs.getDouble(7);
 	}
 }
