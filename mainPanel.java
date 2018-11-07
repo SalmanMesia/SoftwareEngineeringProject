@@ -40,7 +40,7 @@ public class mainPanel extends JPanel{
 	JComboBox<Object> roomCB;
 	JPanel roomsP;
 	JScrollPane roomScrollPane;
-	
+	JTextField roomPriceField;
 	/*
 	 * objects for maintenance DB.
 	 */
@@ -117,6 +117,17 @@ public class mainPanel extends JPanel{
 			System.exit(0);
 		});
 		
+		JMenuItem logOutMenuItem = new JMenuItem("Log Out");
+		logOutMenuItem.setMnemonic(KeyEvent.VK_O);
+		logOutMenuItem.setToolTipText("Log out of current user.");
+		logOutMenuItem.addActionListener((ActionEvent event) -> {
+			CardLayout cardLayout = (CardLayout)(c.getLayout());
+			cardLayout.show(c, "Login");
+			usernameField.setText("");
+			passwordField.setText("");
+		});
+		
+		file.add(logOutMenuItem);
 		file.add(exitMenuItem); //add "Exit" to the "File" menu
 		menubar.add(file); //add "File" to the menu bar itself
 		
@@ -124,7 +135,7 @@ public class mainPanel extends JPanel{
 		//Onto the other elements. The Menu bar should be consistent throughout the program.
 		
 		c = new JPanel();//This CardLayout is how we essentially 'switch screens'
-		c.setPreferredSize(new Dimension(800,800));
+		c.setPreferredSize(new Dimension(1000,1000));
 		c.setLayout(new CardLayout(1, 1)); //Purely cosmetic borders
 		
 		/*
@@ -191,17 +202,15 @@ public class mainPanel extends JPanel{
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(2,1));
 		JPanel pInP = new JPanel();
-		pInP.setLayout(new GridLayout(1,4));
+		pInP.setLayout(new GridLayout(1,3));
 		
 		//Create Buttons
 		JButton payrollB = new JButton("Payroll");
-		JButton roomsB = new JButton("Rooms");
 		JButton maintB = new JButton("Maintenance");
-		JButton entertainB = new JButton("Events");
+		JButton entertainB = new JButton("Events/Dining");
 
 		//Add them to the horizontal Grid
 		pInP.add(payrollB);
-		pInP.add(roomsB);
 		pInP.add(maintB);
 		pInP.add(entertainB);
 		//Add horizontal Grid to a vertical Grid
@@ -216,7 +225,6 @@ public class mainPanel extends JPanel{
 		//Add listeners
 		payrollB.addActionListener(new ButtonListener());
 		//payrollB.addActionListener(new payrollButtonListener());
-		roomsB.addActionListener(new roomsButtonListener());
 		maintB.addActionListener(new ButtonListener());
 		entertainB.addActionListener(new ButtonListener());
 		checkinout.addActionListener(new ButtonListener());
@@ -245,7 +253,7 @@ public class mainPanel extends JPanel{
 		c.add(payrollP, "Payroll");
 		
 		employeesB.addActionListener(new ButtonListener());
-		salesB.addActionListener(new ButtonListener());
+		salesB.addActionListener(new roomsButtonListener());
 		backB.addActionListener(new BackButtonListener());
 		
 		/*
@@ -288,86 +296,29 @@ public class mainPanel extends JPanel{
 		/*
 		 * Screen: "Sales"
 		 */
-		
-		JPanel salesP = new JPanel();
-		salesP.setLayout(new BorderLayout());
-		JButton button = new JButton("UPDATE PRICE");
-		//updatePrice.addActionListener(new ButtonListener());
-		
-		JPanel chooseR = new JPanel(); //choose room to update price
-		JPanel updateP = new JPanel(); //update price panel
-
-		//JTable salesTable = new JTable();
-		
-		JLabel salesTitle = new JLabel("Sales");
-		salesTitle.setHorizontalAlignment(JLabel.CENTER);
-		//////////////////////////////////////////////////////////////////////
-		//roomsP2 = new JPanel();
-		salesP.setLayout(new BorderLayout());
-		
-		ResultSet roomSet2 = rooms.displayRooms();
-		salesTable = new JTable(buildTableModel(roomSet2));
-		roomScrollPane2 = new JScrollPane(salesTable);
-		
-		JPanel roomInfoP2 = new JPanel();
-		
-		roomCB2 = new JComboBox<Object>(buildComboBoxModel(salesTable));
-		//roomCB2.addItemListener(new floorBoxListener2());
-		
-		//cableCB = new JCheckBox("Cable");
-		
-		//internetCB = new JCheckBox("Internet");
-		
-		//JButton roomChangeButton = new JButton("Change");
-		//roomChangeButton.addActionListener(new roomChangeListener());
-		
-		JButton roomsBackB = new JButton("Back");
-		roomsBackB.addActionListener(new BackButtonListener());
-		
-		roomInfoP2.add(roomCB2);
-		//roomInfoP2.add(cableCB);
-		//roomInfoP2.add(internetCB);
-		//roomInfoP2.add(roomChangeButton);
-		salesP.add(roomScrollPane2, BorderLayout.WEST);
-		salesP.add(roomInfoP2, BorderLayout.EAST);
-		salesP.add(roomsBackB, BorderLayout.SOUTH);
-		button.add(salesTable);
-		//button.addActionListener(new comboSelect());
-		//c.add(roomsP, "Rooms");
-		
-		//updatePrice = new JTextField();
-		
-		//chooseR.add(roomCB);
-		//salesP.add(roomScrollPane, BorderLayout.WEST);
-		//roomCB.addItemListener(new floorBoxListener());
-		//JButton changePriceButton = new JButton("Change Price");
-		//salesP.add(chooseR);
-		//changePriceButton.addActionListener(new roomChangeListener());
-		//////////////////////////////////////////////////////////////////////
-		
-		JButton salesBackB = new JButton("Back");
-		salesBackB.addActionListener(new payrollBackListener());
-		
-		salesP.add(salesTitle, BorderLayout.NORTH);
-		salesP.add(salesBackB, BorderLayout.SOUTH);
-		salesP.add(salesTable, BorderLayout.CENTER);
-		salesP.add(button, BorderLayout.WEST);
-		//salesP.add(price, BorderLayout.EAST);
-		
-		c.add(salesP, "Sales");
-		
-		/*
-		 * Screen: "Rooms"
-		 */
-		
+		//Everything is called "rooms" because these elements used to be the "Rooms" screen
 		roomsP = new JPanel();
 		roomsP.setLayout(new BorderLayout());
+		
+		JPanel roomModP = new JPanel();
+		roomModP.setLayout(new GridLayout(4,1));
+		
+		JPanel roomInfoP = new JPanel();
+		
+		JPanel roomComboBoxPanel = new JPanel();
+		
+		JPanel roomPricePanel = new JPanel();
 		
 		ResultSet roomSet = rooms.displayRooms();
 		roomTable = new JTable(buildTableModel(roomSet));
 		roomScrollPane = new JScrollPane(roomTable);
 		
-		JPanel roomInfoP = new JPanel();
+		JLabel roomInfoLabel = new JLabel("Update Services:");
+		
+		
+		
+		JLabel roomModLabel = new JLabel("Select Room:");
+		
 		
 		roomCB = new JComboBox<Object>(buildComboBoxModel(roomTable));
 		roomCB.addItemListener(new floorBoxListener());
@@ -376,26 +327,41 @@ public class mainPanel extends JPanel{
 		
 		internetCB = new JCheckBox("Internet");
 		
-		JButton roomChangeButton = new JButton("Change");
+		JButton roomChangeButton = new JButton("Change Services");
 		roomChangeButton.addActionListener(new roomChangeListener());
 		
-		//JButton roomsBackB = new JButton("Back");
-		//roomsBackB.addActionListener(new BackButtonListener());
+		JLabel roomPriceLabel = new JLabel("Change the Price:");
+		
+		roomPriceField = new JTextField(5);
+		
+		JButton roomPriceButton = new JButton("Update Price");
+		roomPriceButton.addActionListener(new RoomPriceChangeListener());
 		
 		JButton roomsBackB2 = new JButton("Back");
 		roomsBackB2.addActionListener(new BackButtonListener());
 		
-		roomInfoP.add(roomCB);
+		roomComboBoxPanel.add(roomModLabel);
+		roomComboBoxPanel.add(roomCB);
+		
+		roomInfoP.add(roomInfoLabel);
 		roomInfoP.add(cableCB);
 		roomInfoP.add(internetCB);
 		roomInfoP.add(roomChangeButton);
 		
+		roomPricePanel.add(roomPriceLabel);
+		roomPricePanel.add(roomPriceField);
+		roomPricePanel.add(roomPriceButton);
+		
+		//roomModP.add(roomModLabel);
+		roomModP.add(roomComboBoxPanel);
+		roomModP.add(roomInfoP);
+		roomModP.add(roomPricePanel);
+		
 		roomsP.add(roomScrollPane, BorderLayout.WEST);
-		roomsP.add(roomInfoP, BorderLayout.EAST);
-		//roomsP.add(roomsBackB, BorderLayout.SOUTH);
+		roomsP.add(roomModP, BorderLayout.EAST);
 		roomsP.add(roomsBackB2, BorderLayout.SOUTH);
 		
-		c.add(roomsP, "Rooms");
+		c.add(roomsP, "Sales");
 
 		/*
 		 * Screen: "Maintenance Menu"
@@ -520,7 +486,30 @@ public class mainPanel extends JPanel{
 		checkBackB.addActionListener(new BackButtonListener());
 
 		/*
-		 * "Event Spaces"
+		 * "Events/Dining"
+		 */
+		JPanel eventDiningP = new JPanel();
+		eventDiningP.setLayout(new BorderLayout());
+		JPanel eventDiningMiddleP = new JPanel();
+		eventDiningMiddleP.setLayout(new GridLayout(1,2));
+		
+		JButton eventButton = new JButton("Events");
+		JButton diningButton = new JButton("Dining");
+		JButton eventDiningBackB = new JButton("Back");
+		
+		eventButton.addActionListener(new ButtonListener());
+		diningButton.addActionListener(new ButtonListener());
+		eventDiningBackB.addActionListener(new BackButtonListener());
+		
+		eventDiningMiddleP.add(eventButton);
+		eventDiningMiddleP.add(diningButton);
+		
+		eventDiningP.add(eventDiningMiddleP, BorderLayout.CENTER);
+		eventDiningP.add(eventDiningBackB, BorderLayout.SOUTH);
+		
+		c.add(eventDiningP, "Events/Dining");
+		/*
+		 * "Events"
 		 */
 		JPanel eventP = new JPanel();
 		eventP.setLayout(new BorderLayout());
@@ -552,7 +541,7 @@ public class mainPanel extends JPanel{
 		//JLabel eventSchedule = new JLabel("Schedule:");
 		
 		JButton eventBackB = new JButton("Back");
-		eventBackB.addActionListener(new BackButtonListener());
+		eventBackB.addActionListener(new EventsBackButtonListener());
 		
 		//eventDataP.add(eventMap);
 		//eventDataP.add(eventSchedule);
@@ -951,10 +940,10 @@ public class mainPanel extends JPanel{
 		}
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////
-	private class entertainmentBackListener implements ActionListener{
+	private class EventsBackButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
-			cardLayout.show(c,  "Entertainment");
+			cardLayout.show(c,  "Events/Dining");
 		}
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1047,6 +1036,27 @@ public class mainPanel extends JPanel{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				}
+			}
+		}
+	}
+	private class RoomPriceChangeListener implements ActionListener{
+		public void actionPerformed(ActionEvent event) {
+			try {
+			    rooms.updatePrice((int)roomCB.getSelectedItem(),Double.parseDouble(roomPriceField.getText()));
+			} catch (NumberFormatException e) {
+			    e.printStackTrace();
+			    // handle the error
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for(int i = 0; i < roomTable.getRowCount(); i++) {
+				if((int)roomTable.getValueAt(i,1) == (int)roomCB.getSelectedItem()) {
+					roomTable.setValueAt(Double.parseDouble(roomPriceField.getText()), i, 5);
 				}
 			}
 		}
