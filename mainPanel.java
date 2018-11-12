@@ -1,4 +1,5 @@
 import java.awt.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -10,8 +11,15 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
+//import mainPanel.LoginListener;
+//import mainPanel.checkButtonListener;
+
+//import mainPanel.LoginListener;
+//import mainPanel.checkButtonListener;
+
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Vector;
 import java.util.List;
 
@@ -87,7 +95,17 @@ public class mainPanel extends JPanel{
 	JPanel eventsP;
 	JScrollPane eventsScrollPane;
 	JComboBox<Object> eventsCB;
-
+	JComboBox<Object> daysCB;
+	JComboBox<Object> hoursCB;
+	JComboBox<Object> hoursCB2;
+	JComboBox<Object> seatsCB;
+	JComboBox<Object> dateCB;
+	//JComboBox<Object> timeCB;
+	SwingCalendar dateCalendar;
+	JTextField fname;
+	JTextField lname;
+	double salesEvents;
+	double eventTotal = 0;		//keeps track of total sales for events
 	/*
 	 * objects just for the Users DB.
 	 */
@@ -98,6 +116,14 @@ public class mainPanel extends JPanel{
 	JTable userTable;
 	JScrollPane userScrollPane;
 	JFrame check;
+	int count = 0;
+	int delay = 1000;
+	int countPassed = 60;
+	Timer countdown;
+	JLabel lblTimer;
+	//private javax.swing.JLabel lblTimer;
+	//private javax.swing.JPanel panel1;
+	int attempts = 0;
 	
 	
 	public mainPanel() throws ClassNotFoundException, SQLException{
@@ -135,7 +161,7 @@ public class mainPanel extends JPanel{
 		//Onto the other elements. The Menu bar should be consistent throughout the program.
 		
 		c = new JPanel();//This CardLayout is how we essentially 'switch screens'
-		c.setPreferredSize(new Dimension(1000,1000));
+		c.setPreferredSize(new Dimension(1400,1000));
 		c.setLayout(new CardLayout(1, 1)); //Purely cosmetic borders
 		
 		/*
@@ -207,7 +233,7 @@ public class mainPanel extends JPanel{
 		//Create Buttons
 		JButton payrollB = new JButton("Payroll");
 		JButton maintB = new JButton("Maintenance");
-		JButton entertainB = new JButton("Events/Dining");
+		JButton entertainB = new JButton("Events");
 
 		//Add them to the horizontal Grid
 		pInP.add(payrollB);
@@ -486,69 +512,76 @@ public class mainPanel extends JPanel{
 		checkBackB.addActionListener(new BackButtonListener());
 
 		/*
-		 * "Events/Dining"
-		 */
-		JPanel eventDiningP = new JPanel();
-		eventDiningP.setLayout(new BorderLayout());
-		JPanel eventDiningMiddleP = new JPanel();
-		eventDiningMiddleP.setLayout(new GridLayout(1,2));
-		
-		JButton eventButton = new JButton("Events");
-		JButton diningButton = new JButton("Dining");
-		JButton eventDiningBackB = new JButton("Back");
-		
-		eventButton.addActionListener(new ButtonListener());
-		diningButton.addActionListener(new ButtonListener());
-		eventDiningBackB.addActionListener(new BackButtonListener());
-		
-		eventDiningMiddleP.add(eventButton);
-		eventDiningMiddleP.add(diningButton);
-		
-		eventDiningP.add(eventDiningMiddleP, BorderLayout.CENTER);
-		eventDiningP.add(eventDiningBackB, BorderLayout.SOUTH);
-		
-		c.add(eventDiningP, "Events/Dining");
-		/*
 		 * "Events"
 		 */
+		
 		JPanel eventP = new JPanel();
 		eventP.setLayout(new BorderLayout());
-		JPanel eventDataP = new JPanel();
-		eventDataP.setLayout(new GridLayout(1,2));
-		JButton buttonss = new JButton("Reserve Ticket");
+		JPanel event = new JPanel();
+		JPanel event2 = new JPanel();
+		JPanel outer = new JPanel(new BorderLayout());
+		event.setLayout(new FlowLayout());
+		event2.setLayout(new FlowLayout());
+		
+		JButton buttonss = new JButton("RESERVE");
+		
+		JLabel date = new JLabel("Choose Date:");
+		JLabel from = new JLabel("From:");
+		JLabel to = new JLabel("To:");
+		JLabel size = new JLabel("Seats:");
+		JLabel fn = new JLabel("First Name:");
+		JLabel ln = new JLabel("Last Name:");
+		dateCalendar = new SwingCalendar();
 		
 		ResultSet eventSet = events.displayEvents();
 		eventsTable = new JTable(buildTableModele(eventSet));
 		eventsScrollPane = new JScrollPane(eventsTable);
 		
-		JPanel event2 = new JPanel();
-		eventsCB = new JComboBox<Object>(buildComboBoxModele(eventsTable));
-		eventsCB.addItemListener(new floorBoxListener2());
-
-		buttonss.addActionListener(new ticket());
-		event2.add(eventsCB, BorderLayout.EAST);
-		//event2.add(buttonss, BorderLayout.SOUTH);
+		
+		daysCB = new JComboBox<Object>(buildComboBoxModeld(eventsTable));
+		hoursCB = new JComboBox<Object>(buildComboBoxModelh(eventsTable));
+		seatsCB = new JComboBox<Object>(buildComboBoxModels(eventsTable));
+		hoursCB2 = new JComboBox<Object>(buildComboBoxModelh(eventsTable));
+		fname = new JTextField(20);
+		lname = new JTextField(20);
+		event2.add(fname);
+		event2.add(lname);
+		
+		event.setLayout(new FlowLayout());
+		event.add(date);
+		event.add(dateCalendar);
+		event.add(daysCB);
+		event.add(from);
+		event.add(hoursCB);
+		event.add(to);
+		event.add(hoursCB2);
+		event.add(size);
+		event.add(seatsCB);
+		event.add(fn);
+		event.add(fname);
+		event.add(ln);
+		event.add(lname);
+		
+		
+		outer.add(event, BorderLayout.EAST);
+		outer.add(event2, BorderLayout.WEST);
+		eventP.add(outer, BorderLayout.CENTER);
+		
+		buttonss.addActionListener(new dateListener());
+		
+		
+		
 		eventP.add(eventsScrollPane, BorderLayout.NORTH);
-		eventP.add(event2, BorderLayout.EAST);
-		//eventP.add(button);
-		//eventP.add(eventBackB, BorderLayout.SOUTH);
-		//buttonss.add(eventsTable);
-		eventP.add(buttonss);
 		
-		//JLabel eventMap = new JLabel("MAP GOES HERE");
-		//.removeAll()eventMap.setHorizontalAlignment(JLabel.CENTER);
 		
-		//JLabel eventSchedule = new JLabel("Schedule:");
 		
 		JButton eventBackB = new JButton("Back");
-		eventBackB.addActionListener(new EventsBackButtonListener());
+		eventBackB.addActionListener(new BackButtonListener());
 		
-		//eventDataP.add(eventMap);
-		//eventDataP.add(eventSchedule);
-		//eventP.add(eventDataP);
+		eventP.add(buttonss, BorderLayout.EAST);
 		eventP.add(eventBackB, BorderLayout.SOUTH);
-		
 		c.add(eventP, "Events");
+		
 		/*
 		 * Check-In
 		 */
@@ -782,7 +815,7 @@ public class mainPanel extends JPanel{
 			
 			Vector<String> columnNames = new Vector<String>(); //get columnnames
 			//int columnCount = metaData.getColumnCount(); this line has no use for us since we know how many columns there are
-			for (int column = 1; column <= 10; column++){
+			for (int column = 1; column <= 6; column++){
 				columnNames.add(metaData.getColumnName(column));
 			}
 			
@@ -790,7 +823,7 @@ public class mainPanel extends JPanel{
 			Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 			while (rs.next()){
 				Vector<Object> vector = new Vector<Object>();
-				for (int columnIndex = 1; columnIndex <= 10; columnIndex++){
+				for (int columnIndex = 1; columnIndex <= 6; columnIndex++){
 					vector.add(rs.getObject(columnIndex));
 				}
 				data.add(vector);
@@ -859,6 +892,49 @@ public class mainPanel extends JPanel{
 		for(int event = 0; event < table.getRowCount(); event++){
 			events.add(table.getValueAt(event, 0));
 		}
+		return events;
+	}
+	
+	public static Vector<Object> buildComboBoxModeld(JTable table){
+		Vector<Object> events = new Vector<Object>();
+		for(int event = 0; event < table.getRowCount(); event++){
+			events.add(table.getValueAt(event, 1));
+		}
+		return events;
+	}
+
+	public static Vector<Object> buildComboBoxModelh(JTable table){
+		Vector<Object> events = new Vector<Object>();
+		//for(int event = 0; event < table.getRowCount(); event++){
+			//events.add(table.getValueAt(event, 3));
+		//}
+		for(int event = 9; event <= 19; event++) {
+			//events.add(event+" AM");
+			if(event < 12) {
+				events.add(event+ " AM");
+			}
+			else if(event == 12) {
+				events.add(event+ " PM");
+
+			}
+			
+			else {
+				events.add((event-12) + " PM");
+				//events.add(12, "AM");
+			}
+		}
+		return events;
+	}
+	
+	public static Vector<Object> buildComboBoxModels(JTable table){
+		
+		Vector<Object> events = new Vector<Object>();
+		//for(int event = 0; event < table.getRowCount(); event++){
+			//events.add(table.getValueAt(event, 2));
+		//}
+		events.add(100);
+		events.add(300);
+		events.add(500);
 		return events;
 	}
 	
@@ -1186,14 +1262,40 @@ public class mainPanel extends JPanel{
 	}
 	}
 	
+	
+
+
+public void startTimer(int countPassed, JFrame frame) {
+	ActionListener action = new ActionListener() {
+	public void actionPerformed(ActionEvent event){
+		if(count==0) {
+			countdown.stop();
+			frame.dispose();
+		}else {
+			
+			count--;
+		}
+	}
+};
+	countdown = new Timer(delay,action);
+	countdown.setInitialDelay(0);
+	countdown.start();
+	count = countPassed;
+}
 	/////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	
 	//****LOGIN*****//
 	private class LoginListener2 implements ActionListener{
+		//ActionListener action;
+		@SuppressWarnings("deprecation")
 		public void actionPerformed(ActionEvent event){
 			String username = usernameField.getText();
-			String password = new String(passwordField.getPassword());
-			boolean found = false;
+			String pwtyped = passwordField.getText();	//user types this into password field
 			
+			String password = users.getHash(pwtyped.getBytes(),"SHA-512");	//password is encrypted
+			boolean found = false;
 			
 			//checks to see if username and password match
 				for(int i=0; i<userTable.getRowCount(); i++) {
@@ -1223,6 +1325,25 @@ public class mainPanel extends JPanel{
 					check.setVisible(true);
 				}
 				else {
+					attempts++;
+					if(attempts==3){
+						
+						JLabel label = new JLabel("You have attempted 3 times");
+						JLabel lock = new JLabel("SYSTEM IS LOCKED FOR 30 SECONDS");
+						check = new JFrame();
+						check.setSize(300, 300);
+						Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+						check.setLocation(dim.width/2-check.getSize().width/2, dim.height/2-check.getSize().height/2);
+						check.setLayout(new FlowLayout());
+						check.add(label);
+						check.add(lock);
+						startTimer(30, check);
+						check.setUndecorated(true);
+						check.setVisible(true);
+						attempts = 0;
+					}
+					
+				else {
 					JButton button = new JButton("Try again");
 					check = new JFrame();
 					check.setSize(300,300);
@@ -1234,16 +1355,23 @@ public class mainPanel extends JPanel{
 					check.add(button);
 					button.addActionListener(new checkButtonListener());
 					check.setVisible(true);
+					}
 				}
 		}
+		
+	
 	}
+	
 	
 	//This is to allow login by just pressing ENTER in the passwordfield
 	private class LoginListener3 implements KeyListener{
+		@SuppressWarnings("deprecation")
 		public void keyPressed(KeyEvent e) {
 			if(e.getKeyCode()==KeyEvent.VK_ENTER) {
 				String username = usernameField.getText();
-				String password = new String(passwordField.getPassword());
+				String pwtyped = passwordField.getText();	//user types this into password field
+				
+				String password = users.getHash(pwtyped.getBytes(),"SHA-512");	//password is encrypted
 				boolean found = false;
 				
 				
@@ -1275,6 +1403,30 @@ public class mainPanel extends JPanel{
 						check.setVisible(true);
 					}
 					else {
+						attempts++;
+						if(attempts==3){
+							JPanel panel = new JPanel();
+							panel.setLayout(new GridLayout(0, 1));
+							
+							JLabel label = new JLabel("You have attempted 3 times", SwingConstants.CENTER);
+							JLabel lock = new JLabel("SYSTEM IS LOCKED FOR 30 SECONDS", SwingConstants.CENTER);
+							panel.add(label);
+							panel.add(lock);
+							check = new JFrame();
+							check.setSize(300, 300);
+							Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+							check.setLocation(dim.width/2-check.getSize().width/2, dim.height/2-check.getSize().height/2);
+							//check.setLayout(new FlowLayout());
+							//check.add(label);
+							//check.add(lock);
+							check.add(panel);
+							startTimer(30, check);
+							check.setUndecorated(true);
+							check.setVisible(true);
+							attempts = 0;
+						}
+						
+					else {
 						JButton button = new JButton("Try again");
 						check = new JFrame();
 						check.setSize(300,300);
@@ -1286,6 +1438,7 @@ public class mainPanel extends JPanel{
 						check.add(button);
 						button.addActionListener(new checkButtonListener());
 						check.setVisible(true);
+						}
 					}
 			}
 		}
@@ -1293,6 +1446,73 @@ public class mainPanel extends JPanel{
 		}
 		public void keyTyped(KeyEvent arg0) {
 			
+		}
+	}
+	
+	private class dateListener implements ActionListener{
+		private int hr;
+		private int hr2;
+		private double small;
+		private double medium;
+		private double large;
+		public void actionPerformed(ActionEvent event){
+			int dayOfWeek;
+			small = 100;
+			medium = 200;
+			large = 300;
+			
+			 if(dateCalendar.getDate().before(new Date(System.currentTimeMillis()))){
+
+				return;
+			}
+			
+			else{
+				
+				
+				String day = dateCalendar.getDate2(dateCalendar.getDate());
+				if ( ((String) hoursCB.getSelectedItem()).indexOf("AM") != -1 ||  ((String) hoursCB.getSelectedItem()).indexOf("PM") != -1 || ((String) hoursCB2.getSelectedItem()).indexOf("AM") != -1 || ((String) hoursCB2.getSelectedItem()).indexOf("PM") != -1) {
+					int x = Integer.parseInt(((String) hoursCB.getSelectedItem()).replaceAll("[\\D]", ""));
+					int y = Integer.parseInt(((String) hoursCB2.getSelectedItem()).replaceAll("[\\D]", ""));
+					if(x>7 && y>7) {
+						hr = y - x;
+					}
+					else if(x<=7 && y<=7) {
+						hr = y - x;
+					}
+					else {
+						hr2 = 12-x;
+						hr = y+hr2;
+					}
+
+					} 
+				
+				if((int)seatsCB.getSelectedItem()==100) {
+					salesEvents = small*hr;
+				}
+				if(((int)seatsCB.getSelectedItem())==300) {
+					salesEvents = medium*hr;
+				}
+				if(((int)seatsCB.getSelectedItem())==500) {
+					salesEvents = large*hr;
+				}
+				
+				for(int i = 0; i < eventsTable.getRowCount(); i++) {
+					if(day.equals(eventsTable.getValueAt(i,1)) && dateCalendar.isDayinWeek(dateCalendar.getDate())) {
+						
+						eventsTable.setValueAt("Reserved", i, 4);
+						eventsTable.setValueAt(hr, i, 3);
+						eventsTable.setValueAt(seatsCB.getSelectedItem(), i, 2);
+						eventsTable.setValueAt(salesEvents, i, 5);
+
+					}
+				}
+				for(int j = 0; j<eventsTable.getRowCount(); j++) {
+					eventTotal = eventTotal + ((double)eventsTable.getValueAt(j, 5));
+				}
+					
+				CardLayout cardLayout = (CardLayout)(c.getLayout());
+				cardLayout.show(c, "Events");
+			}
 		}
 	}
 	}

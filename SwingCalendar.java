@@ -1,6 +1,8 @@
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -97,4 +99,26 @@ public class SwingCalendar extends JPanel {
 	return cal.getTime();
   }
  
+ 
+  String getDate2(Date d) {
+	  DateFormat f = new SimpleDateFormat("EEEE");
+      try {
+        return f.format(d);
+      }
+      catch(Exception e) {
+        e.printStackTrace();
+        return "";
+      }
+  }
+  
+  boolean isDayinWeek(Date d) {
+	  Calendar currentCalendar = Calendar.getInstance();
+	  int week = currentCalendar.get(Calendar.WEEK_OF_YEAR);
+	  int year = currentCalendar.get(Calendar.YEAR);
+	  Calendar targetCalendar = Calendar.getInstance();
+	  targetCalendar.setTime(d);
+	  int targetWeek = targetCalendar.get(Calendar.WEEK_OF_YEAR);
+	  int targetYear = targetCalendar.get(Calendar.YEAR);
+	  return week == targetWeek && year == targetYear;
+  }
 }

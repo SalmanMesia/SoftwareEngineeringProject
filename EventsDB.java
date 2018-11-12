@@ -46,7 +46,7 @@ public class EventsDB {
 				Statement state2 = con.createStatement();
 
 				state2.execute("CREATE TABLE events("
-					+ "EventsID INTEGER PRIMARY KEY," 
+					/*+ "EventsID INTEGER PRIMARY KEY," 
 					+ "Seats INT,"
 					+ "Sunday varchar(255)," 
 					+ "Monday varchar(255)," 
@@ -55,15 +55,22 @@ public class EventsDB {
 					+ "Thursday varchar(255),"
 					+ "Friday varchar(255),"
 					+ "Saturday varchar(255)," 
-					+ "Sales DOUBLE);");
+					+ "Sales DOUBLE);");*/
+						
+						+ "EventsID INTEGER PRIMARY KEY," 
+						+ "Day varchar(255),"
+						+ "Seats INT,"
+						+ "Hours INT," 
+						+ "Availability varchar(255),"
+						+ "Sales DOUBLE);");
+						
 				
-				PreparedStatement pre = con.prepareStatement("INSERT INTO events VALUES(?,?,?,?,?,?,?,?,?,?);");
+				PreparedStatement pre = con.prepareStatement("INSERT INTO events VALUES(?,?,?,?,?,?);");
 				
 				
-				for(int i=1; i<event.length; i++) {
+				for(int i=1; i<=days.length; i++) {
 					
-					//pre.setInt(2, i);
-					pre.setInt(2, 300);
+					/*pre.setInt(2, 300);
 					Random rand = new Random();
 					int day = rand.nextInt((9 - 3) + 1) + 3;
 					System.out.println(day);
@@ -75,31 +82,17 @@ public class EventsDB {
 							pre.setString(j, "None");
 						}
 					}
-					/*int f = rand.nextInt(4)+1;
-					pre.setString(2, e[f]);
-					pre.setInt(2, 300);
-					//Random rand = new Random();
-					int s = rand.nextInt(4)+1;
-					pre.setString(3, e[s]);
-					int m = rand.nextInt(4)+1;
-					pre.setString(4, e[m]);
-					int t = rand.nextInt(4)+1;
-					pre.setString(5, e[t]);
-					int w = rand.nextInt(4)+1;
-					pre.setString(6, e[w]);
-					int tr = rand.nextInt(4)+1;
-					pre.setString(7, e[tr]);
-					int ff = rand.nextInt(4)+1;
-					pre.setString(8, e[ff]);
-					int st = rand.nextInt(4)+1;
-					pre.setString(9, e[st]); 
 					
-					double sales = 0.00;
-					//pre.setDouble(4, sales);
-					pre.setDouble(10, sales);*/
 					double sales = 0;
 					pre.setDouble(10, sales);
+					pre.execute();		*/
+					pre.setString(2, days[i-1]);
+					pre.setInt(3, 0);
+					pre.setInt(4, 0);
+					pre.setString(5, "Available");
+					pre.setDouble(6, 0);
 					pre.execute();				
+
 				}		
 			}
 		}
