@@ -5,6 +5,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+
+/*
+ * Hotel Management Software (HMS)
+ * @Author: Salman
+ * @Author: Elven
+ * @Author: Austin
+ * @Author: Hasin
+ *
+ * Tests if the code is working outside the GUI
+ * Debugger program
+*/
+
+
+
 public class App2 {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, ParseException {

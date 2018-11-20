@@ -24,14 +24,27 @@ import java.util.Vector;
 import java.util.List;
 
 
+/*
+ * Hotel Management Software (HMS)
+ * @Author: Salman
+ * @Author: Elven
+ * @Author: Austin
+ * @Author: Hasin
+ *
+*/
+
 public class mainPanel extends JPanel{
+
 	/*
 	 * This is the master panel that actually contains everything.
 	 */
+
 	static JPanel c;
+
 	/*
 	 * These are placeholder variables that should be replaced by actual database objects.
 	 */
+
 	static String[][] employees;
 	static String[][] hours;
 	static String[][] sales;
@@ -41,6 +54,7 @@ public class mainPanel extends JPanel{
 	/*
 	 * objects just for the Rooms DB.
 	 */
+
 	RoomsDB rooms = new RoomsDB();
 	JTable roomTable;
 	JCheckBox cableCB;
@@ -49,9 +63,11 @@ public class mainPanel extends JPanel{
 	JPanel roomsP;
 	JScrollPane roomScrollPane;
 	JTextField roomPriceField;
+
 	/*
 	 * objects for maintenance DB.
 	 */
+
 	MaintenanceDB maintenance = new MaintenanceDB();
 	JComboBox<Object> maintReqRoomCB;
 	JComboBox<Object> maintReqStatusCB;
@@ -62,6 +78,7 @@ public class mainPanel extends JPanel{
 	/*
 	 * objects just for the Registration DB.
 	 */
+
 	RegistrationDB registration = new RegistrationDB();
 	SwingCalendar beginDateCalendar;
 	SwingCalendar endDateCalendar;
@@ -76,12 +93,15 @@ public class mainPanel extends JPanel{
 	/*
 	 * objects just for the Payroll DB.
 	 */
+
 	PayrollDB payroll = new PayrollDB();
 	JTable employeeTable;
 	JPanel employeeP;
 	JScrollPane employeeScrollPane;
 	JTable salesTable;
+
 	/////////////////
+
 	JPanel salesP;
 	JScrollPane roomScrollPane2;
 	JComboBox<Object> roomCB2;
@@ -106,6 +126,7 @@ public class mainPanel extends JPanel{
 	JTextField lname;
 	double salesEvents;
 	double eventTotal = 0;		//keeps track of total sales for events
+
 	/*
 	 * objects just for the Users DB.
 	 */
@@ -121,8 +142,10 @@ public class mainPanel extends JPanel{
 	int countPassed = 60;
 	Timer countdown;
 	JLabel lblTimer;
+
 	//private javax.swing.JLabel lblTimer;
 	//private javax.swing.JPanel panel1;
+
 	int attempts = 0;
 	
 	
@@ -130,6 +153,7 @@ public class mainPanel extends JPanel{
 		//Establish main layout of our GUI
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
+
 		//Making a Menu bar
 		JMenuBar menubar = new JMenuBar();
 		
@@ -167,6 +191,7 @@ public class mainPanel extends JPanel{
 		/*
 		 * Login Screen, yo
 		 */
+
 		JPanel loginP = new JPanel();
 		loginP.setLayout(new GridBagLayout());
 		loginP.setBackground(Color.WHITE);
@@ -225,6 +250,7 @@ public class mainPanel extends JPanel{
 		/*
 		 * Main screen elements. This is done by nesting 2 gridlayouts.
 		 */
+
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(2,1));
 		JPanel pInP = new JPanel();
@@ -239,17 +265,23 @@ public class mainPanel extends JPanel{
 		pInP.add(payrollB);
 		pInP.add(maintB);
 		pInP.add(entertainB);
+
 		//Add horizontal Grid to a vertical Grid
 		p.add(pInP);
+
 		//Bottom button
 		JButton checkinout = new JButton("Check-In/Out");
 		p.add(checkinout);
+
 		//Add it all as 1 card
 		c.add(p, "main");
+
 		//Add that card to the overall layout
 		add(c,BorderLayout.CENTER);
+
 		//Add listeners
 		payrollB.addActionListener(new ButtonListener());
+
 		//payrollB.addActionListener(new payrollButtonListener());
 		maintB.addActionListener(new ButtonListener());
 		entertainB.addActionListener(new ButtonListener());
@@ -294,6 +326,7 @@ public class mainPanel extends JPanel{
 		
 		//JTable employeeTable = new JTable();
 		///////////////////////////////////////////////////////////////////////////
+
 		ResultSet payrollSet = payroll.displayPayroll();
 		JTable employeeTable = new JTable(buildTableModelp(payrollSet));
 		employeeScrollPane = new JScrollPane(employeeTable);
@@ -302,6 +335,7 @@ public class mainPanel extends JPanel{
 		
 		JButton employeeBackB = new JButton("Back");
 		employeeBackB.addActionListener(new payrollBackListener());
+
 		//employeeP.add(x);
 		//x.addActionListener(new payrollButtonListener());
 		//employeesB.addActionListener(new payrollButtonListener());
@@ -313,8 +347,10 @@ public class mainPanel extends JPanel{
 		employeeBottomP.add(generateReportB);
 		
 		employeeP.add(employeeScrollPane);
+
 		//employeeP.add(workSchedule);
 		employeeP.add(employeeBottomP);
+
 		//employeeP.add(employeesB);
 		
 		c.add(employeeP, "Employees");
@@ -323,6 +359,7 @@ public class mainPanel extends JPanel{
 		 * Screen: "Sales"
 		 */
 		//Everything is called "rooms" because these elements used to be the "Rooms" screen
+
 		roomsP = new JPanel();
 		roomsP.setLayout(new BorderLayout());
 		
@@ -392,6 +429,7 @@ public class mainPanel extends JPanel{
 		/*
 		 * Screen: "Maintenance Menu"
 		 */
+
 		JPanel maintP = new JPanel();
 		maintP.setLayout(new BorderLayout());
 		
@@ -432,9 +470,11 @@ public class mainPanel extends JPanel{
 		maintP.add(maintRequestP, BorderLayout.SOUTH);
 		
 		c.add(maintP, "Maintenance");
+
 		/*
 		 * Screen: "Maintenance Request"
 		 */
+
 		JPanel maintReqP = new JPanel();
 		maintReqP.setLayout(new BorderLayout());
 		
@@ -486,9 +526,11 @@ public class mainPanel extends JPanel{
 		maintReqP.add(maintReqTextP, BorderLayout.CENTER);
 		
 		c.add(maintReqP, "Maintenance Request");
+
 		/*
 		 * Check In/Check Out
 		 */
+
 		JPanel checkP = new JPanel();
 		checkP.setLayout(new GridLayout(2,1));
 		JPanel checkPInP = new JPanel();
@@ -652,6 +694,7 @@ public class mainPanel extends JPanel{
 		/*
 		 * "Check-In Time"
 		 */
+
 		JPanel checkInTimeP = new JPanel();
 		checkInTimeP.setLayout(new GridLayout(2,1));
 		
@@ -665,9 +708,11 @@ public class mainPanel extends JPanel{
 		checkInTimeP.add(checkInCloseB);
 		
 		c.add(checkInTimeP, "Check-In Time");
+
 		/*
 		 * "Check-Out ID"
 		 */
+
 		JPanel checkOutIDP = new JPanel();
 		checkOutIDP.setLayout(new GridLayout(2,1));
 		
@@ -678,8 +723,10 @@ public class mainPanel extends JPanel{
 		checkOutIDFNameField = new JTextField(20);
 		JLabel checkOutIDLName = new JLabel("Last Name:");
 		checkOutIDLNameField = new JTextField(30);
+
 		//JLabel checkOutIDNum = new JLabel("ID Number:");
 		//JTextField checkOutIDNumField = new JTextField(9);
+
 		JButton checkOutIDConfirm = new JButton("Submit");
 		checkOutIDConfirm.addActionListener(new IDOutListener());
 		checkOutMessage = new JLabel();
@@ -690,8 +737,10 @@ public class mainPanel extends JPanel{
 		checkOutIDCredP.add(checkOutIDFNameField);
 		checkOutIDCredP.add(checkOutIDLName);
 		checkOutIDCredP.add(checkOutIDLNameField);
+
 		//checkOutIDCredP.add(checkOutIDNum);
 		//checkOutIDCredP.add(checkOutIDNumField);
+
 		checkOutIDCredP.add(checkOutIDConfirm);
 		checkOutIDCredP.add(checkOutMessage);
 		
@@ -699,9 +748,11 @@ public class mainPanel extends JPanel{
 		checkOutIDP.add(checkOutIDBackB);
 		
 		c.add(checkOutIDP, "Check-Out");
+
 		/*
 		 * "Check-Out Time"
 		 */
+
 		JPanel checkOutTimeP = new JPanel();
 		checkOutTimeP.setLayout(new GridLayout(2,1));
 		
@@ -781,6 +832,8 @@ public class mainPanel extends JPanel{
 			}
 		};
 	}
+
+
 	public static DefaultTableModel buildTableModelDefault(ResultSet rs)
 			throws SQLException{
 			ResultSetMetaData metaData = rs.getMetaData();
@@ -841,6 +894,8 @@ public class mainPanel extends JPanel{
 	
 	//*******Payroll********/
 	//////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	public static DefaultTableModel buildTableModelp(ResultSet rs) //stackoverflow/questions/10620448/
 			throws SQLException{
 			ResultSetMetaData metaData = rs.getMetaData();
@@ -867,9 +922,12 @@ public class mainPanel extends JPanel{
 				}
 			};
 		}
+
+
 	//********GENERATE PAYROLL****************//
 	private class PayrollGenerateListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
+
 			try {
 				//stackoverflow/83575022
 				JTextArea textArea = new JTextArea(payroll.generateReport());
@@ -878,6 +936,7 @@ public class mainPanel extends JPanel{
 				textArea.setWrapStyleWord(true);
 				scrollPane.setPreferredSize(new Dimension(1280,720));
 				JOptionPane.showMessageDialog(null, scrollPane,"Payroll Report",JOptionPane.INFORMATION_MESSAGE);
+
 			} catch (ClassNotFoundException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -885,8 +944,10 @@ public class mainPanel extends JPanel{
 		}
 	}
 	
+
 	//**********Events*************//
 	///////////////////////////////////////////////////////////////////////////////////////////
+
 	public static Vector<Object> buildComboBoxModele(JTable table){
 		Vector<Object> events = new Vector<Object>();
 		for(int event = 0; event < table.getRowCount(); event++){
@@ -905,9 +966,11 @@ public class mainPanel extends JPanel{
 
 	public static Vector<Object> buildComboBoxModelh(JTable table){
 		Vector<Object> events = new Vector<Object>();
+
 		//for(int event = 0; event < table.getRowCount(); event++){
 			//events.add(table.getValueAt(event, 3));
 		//}
+
 		for(int event = 9; event <= 19; event++) {
 			//events.add(event+" AM");
 			if(event < 12) {
@@ -929,9 +992,11 @@ public class mainPanel extends JPanel{
 	public static Vector<Object> buildComboBoxModels(JTable table){
 		
 		Vector<Object> events = new Vector<Object>();
+
 		//for(int event = 0; event < table.getRowCount(); event++){
 			//events.add(table.getValueAt(event, 2));
 		//}
+
 		events.add(100);
 		events.add(300);
 		events.add(500);
@@ -947,9 +1012,15 @@ public class mainPanel extends JPanel{
 		}
 		return rooms;
 	}
+
+
+
 	/*
 	 * placeholder listener until we get a working user database
 	 */
+
+
+
 	private class LoginListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
@@ -970,6 +1041,8 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c,  event.getActionCommand());
 		}
 	}
+
+
 	///////////////////////////////
 	private class roomsButtonListener2 implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
@@ -978,6 +1051,7 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, event.getActionCommand());
 		}
 	}
+
 	private class checkInButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			checkInP.add(roomScrollPane, BorderLayout.NORTH);
@@ -985,12 +1059,16 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, event.getActionCommand());
 		}
 	}
+
+
 	private class BackButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
 			cardLayout.show(c, "main");
 		}
 	}
+
+
 	private class payrollBackListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			CardLayout cardLayout = (CardLayout)(c.getLayout());
@@ -1000,6 +1078,8 @@ public class mainPanel extends JPanel{
 	
 	//*****Payroll********//
 	///////////////////////////////////////////////////////////////////////////////////////////
+
+
 	private class payrollButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			//employeeP.add(employeeScrollPane, BorderLayout.WEST);
@@ -1015,6 +1095,7 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c, "Maintenance");
 		}
 	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 	private class EventsBackButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
@@ -1022,6 +1103,7 @@ public class mainPanel extends JPanel{
 			cardLayout.show(c,  "Events/Dining");
 		}
 	}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 	private class checkInOutBackListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
@@ -1055,6 +1137,8 @@ public class mainPanel extends JPanel{
 	/*
 	 * This displays the current state of the selected room ie: after you select a room in the combobox, the checkboxes get checked if the room has those features
 	 */
+
+
 	private class floorBoxListener implements ItemListener{
 		@Override
 		public void itemStateChanged(ItemEvent event){
@@ -1077,9 +1161,12 @@ public class mainPanel extends JPanel{
 			}
 		}
 	}
+
+
 	/*
 	 * This details what happens when you try to change the attributes of a room.
 	 */
+
 	private class roomChangeListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			try {
@@ -1116,6 +1203,8 @@ public class mainPanel extends JPanel{
 			}
 		}
 	}
+
+
 	private class RoomPriceChangeListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
 			try {
@@ -1137,6 +1226,7 @@ public class mainPanel extends JPanel{
 			}
 		}
 	}
+
 	private class CheckInListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			if(roomTable.getSelectedRow() == -1){
@@ -1148,6 +1238,7 @@ public class mainPanel extends JPanel{
 			else if(beginDateCalendar.getDate().after(endDateCalendar.getDate())){
 				return;
 			}
+
 			else{
 				//try {
 				//	registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateCalendar.getDate(), endDateCalendar.getDate());
@@ -1155,10 +1246,13 @@ public class mainPanel extends JPanel{
 					// TODO Auto-generated catch block
 				//	e.printStackTrace();
 				//}
+
 				try {
+
 					//ResultSet checkcheck = registration.displayBooking(beginDateModel.getDate(), endDateModel.getDate());
 					//if (!checkcheck.isBeforeFirst()){
 					//	checkInTime.setText("Sorry, this room and date are already booked.");
+
 					if (!registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateCalendar.getDate(), endDateCalendar.getDate())){
 						JOptionPane.showMessageDialog(null, "Room already reserved!","Alert",JOptionPane.WARNING_MESSAGE);
 						return;
@@ -1173,6 +1267,8 @@ public class mainPanel extends JPanel{
 			}
 		}
 	}
+
+
 	private class IDOutListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			try {
@@ -1188,6 +1284,8 @@ public class mainPanel extends JPanel{
 			}
 		}
 	}
+
+
 	private class MaintRequestListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
 			int id = 0;
@@ -1212,6 +1310,8 @@ public class mainPanel extends JPanel{
 			maintReqText.setText("");
 		}
 	}
+
+
 	private class MaintRemoveListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
 			if (maintTable.getSelectedRow()==-1) {
@@ -1515,4 +1615,4 @@ public void startTimer(int countPassed, JFrame frame) {
 			}
 		}
 	}
-	}
+}
