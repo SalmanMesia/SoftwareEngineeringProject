@@ -1,6 +1,17 @@
 import javax.swing.*;
 import java.sql.*;
 
+/*
+ * Hotel Management Software (HMS)
+ * @Author: Salman
+ * @Author: Elven
+ * @Author: Austin
+ * @Author: Hasin
+ *
+ * Events Database that tracks events hosted by hotel
+ *
+*/
+
 public class gui extends JFrame{
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
