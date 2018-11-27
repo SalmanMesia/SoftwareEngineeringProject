@@ -1140,12 +1140,19 @@ public class mainPanel extends JPanel{
 	private class CheckInListener implements ActionListener{
 		public void actionPerformed(ActionEvent event){
 			if(roomTable.getSelectedRow() == -1){
+				JOptionPane.showMessageDialog(null, "Please select a room from the table.", "Alert", JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 			else if(beginDateCalendar.getDate().before(new Date(System.currentTimeMillis()))){
+				JOptionPane.showMessageDialog(null, "Error: Selected check-in date is on or before current date.", "Alert", JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 			else if(beginDateCalendar.getDate().after(endDateCalendar.getDate())){
+				JOptionPane.showMessageDialog(null, "Error: Selected check-out date is before selected check-in date.", "Alert", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			else if(beginDateCalendar.getDate().equals(endDateCalendar.getDate())) {
+				JOptionPane.showMessageDialog(null, "Error: Selected check-out and check-in dates are the same.", "Alert", JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 			else{
@@ -1161,8 +1168,13 @@ public class mainPanel extends JPanel{
 					//	checkInTime.setText("Sorry, this room and date are already booked.");
 					if (!registration.addGuest(checkInIDFNameField.getText(), checkInIDLNameField.getText(), (int)roomTable.getValueAt(roomTable.getSelectedRow(),0), (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), beginDateCalendar.getDate(), endDateCalendar.getDate())){
 						JOptionPane.showMessageDialog(null, "Room already reserved!","Alert",JOptionPane.WARNING_MESSAGE);
-						return;
 					}
+					else {
+						roomTable.clearSelection();
+						checkInIDFNameField.setText("");
+						checkInIDLNameField.setText("");
+					}
+						return;
 
 				} catch (ClassNotFoundException | SQLException e) {
 					// TODO Auto-generated catch block
