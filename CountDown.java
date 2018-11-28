@@ -39,7 +39,7 @@ public class TestPane extends JPanel {
 
     private Timer timer;
     private long startTime = -1;
-    private long duration = 5000;
+    private long duration = 30000;
 
     private JLabel label;
 

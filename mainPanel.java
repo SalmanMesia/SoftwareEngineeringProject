@@ -6,10 +6,15 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.Timer;
 
 //import mainPanel.LoginListener;
 //import mainPanel.checkButtonListener;
@@ -18,6 +23,7 @@ import javax.swing.table.TableRowSorter;
 //import mainPanel.checkButtonListener;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Vector;
@@ -150,12 +156,26 @@ public class mainPanel extends JPanel{
 	//private javax.swing.JPanel panel1;
 
 	int attempts = 0;
+	Timer timer;
+	long startTime;
+	JLabel label;
 	
 	
 	public mainPanel() throws ClassNotFoundException, SQLException{
 		//Establish main layout of our GUI
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
+		
+		Timer refreshTimer = new Timer(0, new ActionListener() {
+
+			   @Override
+			   public void actionPerformed(ActionEvent e) {
+			      roomTable.repaint();
+			   }
+			});
+
+			refreshTimer.setDelay(30000); // delay for 30 seconds
+			refreshTimer.start();
 
 		//Making a Menu bar
 		JMenuBar menubar = new JMenuBar();
@@ -376,8 +396,39 @@ public class mainPanel extends JPanel{
 		JPanel roomPricePanel = new JPanel();
 		
 		ResultSet roomSet = rooms.displayRooms();
-		roomTable = new JTable(buildTableModel(roomSet));
+		roomTable = new JTable(buildTableModel(roomSet))
+			{
+	            public boolean getScrollableTracksViewportWidth()
+	            {
+	                return getPreferredSize().width < getParent().getWidth();
+	            }
+	        };
+		roomTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		roomScrollPane = new JScrollPane(roomTable);
+		roomScrollPane.setOpaque(false);
+		roomScrollPane.getViewport().setOpaque(false);
+		roomTable.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseReleased(MouseEvent e) {
+		        int r = roomTable.rowAtPoint(e.getPoint());
+		        if (r >= 0 && r < roomTable.getRowCount()) {
+		            roomTable.setRowSelectionInterval(r, r);
+		        } else {
+		            roomTable.clearSelection();
+		        }
+
+		        int rowindex = roomTable.getSelectedRow();
+		        if (rowindex < 0)
+		            return;
+		        if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
+		            JPopupMenu popup = null;
+		            //In case we need a popup event when right clicking the table.
+		            //popup.show(e.getComponent(), e.getX(), e.getY());
+		        }
+		    }
+		});
+		roomTable.setOpaque(false);
+		((DefaultTableCellRenderer)roomTable.getDefaultRenderer(Object.class)).setOpaque(false);
 		
 		JLabel roomInfoLabel = new JLabel("Update Services:");
 		
@@ -1580,9 +1631,30 @@ public void startTimer(int countPassed, JFrame frame) {
 						if(attempts==3){
 							JPanel panel = new JPanel();
 							panel.setLayout(new GridLayout(0, 1));
+							startTime = -1;
+							long duration = 30000;
+							timer = new Timer(10, new ActionListener() {
+								@Override
+								public void actionPerformed(ActionEvent e) {
+									JLabel label = new JLabel();
+					                if (startTime < 0) {
+					                    startTime = System.currentTimeMillis();
+					                }
+					                long now = System.currentTimeMillis();
+					                long clockTime = now - startTime;
+					                if (clockTime >= duration) {
+					                    clockTime = duration;
+					                    timer.stop();
+					                }
+					                SimpleDateFormat df = new SimpleDateFormat("mm:ss:SSS");
+					                label.setText(df.format(duration - clockTime));
+					            }
+					        });
 							
-							JLabel label = new JLabel("You have attempted 3 times", SwingConstants.CENTER);
+							JLabel tryLabel = new JLabel("You have attempted 3 times", SwingConstants.CENTER);
 							JLabel lock = new JLabel("SYSTEM IS LOCKED FOR 30 SECONDS", SwingConstants.CENTER);
+							label = new JLabel("...");
+							panel.add(tryLabel);
 							panel.add(label);
 							panel.add(lock);
 							check = new JFrame();
@@ -1594,6 +1666,8 @@ public void startTimer(int countPassed, JFrame frame) {
 							//check.add(lock);
 							check.add(panel);
 							startTimer(30, check);
+							timer.start();
+							//CountDown loginCountDown = new CountDown();
 							check.setUndecorated(true);
 							check.setVisible(true);
 							attempts = 0;
