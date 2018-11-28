@@ -63,6 +63,9 @@ public class mainPanel extends JPanel{
 	JPanel roomsP;
 	JScrollPane roomScrollPane;
 	JTextField roomPriceField;
+	JCheckBox preCableCB;
+	JCheckBox preInternetCB;
+	JComboBox<Object> preRoomCB;
 
 	/*
 	 * objects for maintenance DB.
@@ -636,7 +639,7 @@ public class mainPanel extends JPanel{
 		checkInDateP.setLayout(new GridLayout(4,1));
 		
 		JPanel checkInGuestP = new JPanel();
-		checkInGuestP.setLayout(new GridLayout(2,1));
+		checkInGuestP.setLayout(new GridLayout(3,1));
 		
 		JPanel firstNameP = new JPanel();
 		firstNameP.setLayout(new FlowLayout());
@@ -646,6 +649,9 @@ public class mainPanel extends JPanel{
 		
 		JPanel checkInBottomP = new JPanel();
 		checkInBottomP.setLayout(new GridLayout(1,2));
+		
+		JPanel checkInChangeP = new JPanel();
+		checkInChangeP.setLayout(new FlowLayout());
 		
 
 		JLabel beginDateLabel = new JLabel("Start Date:");
@@ -661,6 +667,18 @@ public class mainPanel extends JPanel{
 		
 		JLabel checkInIDLName = new JLabel("Last Name:",SwingConstants.RIGHT);
 		checkInIDLNameField = new JTextField(30);
+		
+		JLabel preCheckRoomChanger = new JLabel("Enable Services:");
+		
+		preRoomCB = new JComboBox<Object>(buildComboBoxModel(roomTable));
+		preRoomCB.addItemListener(new floorBoxListener());
+		
+		preCableCB = new JCheckBox("Cable");
+		
+		preInternetCB = new JCheckBox("Internet");
+		
+		JButton preRoomChangeButton = new JButton("Change Services");
+		preRoomChangeButton.addActionListener(new preRoomChangeListener());
 		
 		JButton checkInBackB = new JButton("Back");
 		checkInBackB.addActionListener(new checkInOutBackListener());
@@ -679,8 +697,15 @@ public class mainPanel extends JPanel{
 		lastNameP.add(checkInIDLName);
 		lastNameP.add(checkInIDLNameField);
 		
+		checkInChangeP.add(preCheckRoomChanger);
+		checkInChangeP.add(preRoomCB);
+		checkInChangeP.add(preCableCB);
+		checkInChangeP.add(preInternetCB);
+		checkInChangeP.add(preRoomChangeButton);
+		
 		checkInGuestP.add(firstNameP);
 		checkInGuestP.add(lastNameP);
+		checkInGuestP.add(checkInChangeP);
 		
 		checkInBottomP.add(checkInBackB);
 		checkInBottomP.add(checkInConfirmB);
@@ -1195,6 +1220,42 @@ public class mainPanel extends JPanel{
 					else roomTable.setValueAt("No", i, 4);
 					try {
 						roomTable.setValueAt(rooms.getPrice(rooms.getRoomDetail((int)roomCB.getSelectedItem())), i, 5);
+					} catch (ClassNotFoundException | SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+	private class preRoomChangeListener implements ActionListener{
+		public void actionPerformed(ActionEvent event){
+			try {
+				rooms.updateCable((int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), preCableCB.isSelected()); //This updates the database based on the status of the "Cable" checkbox
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				rooms.updateInternet((int)roomTable.getValueAt(roomTable.getSelectedRow(), 1), preInternetCB.isSelected()); //This updates the database based on the status of the "Internet" checkbox
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for(int i = 0;i < roomTable.getRowCount(); i++){
+				if((int)roomTable.getValueAt(i,1) == (int)roomTable.getValueAt(roomTable.getSelectedRow(), 1)){
+					if(preCableCB.isSelected()){
+						roomTable.setValueAt("Yes", i, 3);
+					}
+					else
+						roomTable.setValueAt("No", i, 3);
+					if(internetCB.isSelected()){
+						roomTable.setValueAt("Yes", i, 4);
+					}
+					else roomTable.setValueAt("No", i, 4);
+					try {
+						roomTable.setValueAt(rooms.getPrice(rooms.getRoomDetail((int)roomTable.getValueAt(roomTable.getSelectedRow(), 1))), i, 5);
 					} catch (ClassNotFoundException | SQLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
