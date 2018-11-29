@@ -1,7 +1,4 @@
 import javax.swing.*;
-
-import com.alee.laf.WebLookAndFeel;
-
 import java.sql.*;
 
 /*
@@ -15,10 +12,10 @@ import java.sql.*;
  *
 */
 
-public class gui extends JFrame{
+public class main extends JFrame{
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
-		/*try {
+		try {
 			UIManager.setLookAndFeel(
 					UIManager.getSystemLookAndFeelClassName());
 		} catch (InstantiationException e) {
@@ -31,8 +28,6 @@ public class gui extends JFrame{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {}
-		*/
-		WebLookAndFeel.install();
 		JFrame frame = new JFrame("HMS - Hotel Management System");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

@@ -166,16 +166,6 @@ public class mainPanel extends JPanel{
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
 		
-		Timer refreshTimer = new Timer(0, new ActionListener() {
-
-			   @Override
-			   public void actionPerformed(ActionEvent e) {
-			      roomTable.repaint();
-			   }
-			});
-
-			refreshTimer.setDelay(30000); // delay for 30 seconds
-			refreshTimer.start();
 
 		//Making a Menu bar
 		JMenuBar menubar = new JMenuBar();
